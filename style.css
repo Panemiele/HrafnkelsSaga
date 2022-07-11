@@ -1,8 +1,17 @@
 body {
-    background-color: #fa9062;
+    background-color: #d6d6d6;
     text-align: center;
 }
 
 div{
     text-align: center;
 }
+
+.link{
+    stroke: grey;
+}
+
+#characters{
+    position: absolute;
+}
+
