@@ -5,6 +5,7 @@ var width = 800 - margin.left - margin.right;
 var height = 800 - margin.top - margin.bottom;
 var updateTime = 1000; // time for transitions
 var imageSize = 40;
+var chapterNumber = 1;
 
 // Scales definitions
 var svgHeightScale = d3.scaleLinear();
@@ -15,7 +16,6 @@ var svg = d3.selectAll("#graph")
     .attr("width", width)
     .attr("height", height);
 
-// Retrieve data from json files
 d3.json('/dataset/characters_nodes.json').then(function(nodesData) {
     d3.json('/dataset/characters_edges.json').then(function(edgesData) {
         d3.json('/dataset/actions.json').then(function(actionsData) {
@@ -144,6 +144,10 @@ d3.json('/dataset/characters_nodes.json').then(function(nodesData) {
                     svgHeightScale.range([0, height - nodeRadius - 40]);
                 }
 
+                function getChapterNumber() {
+                    chapterNumber = document.querySelector('#rangeField').value;
+                }
+
                 function ForceGraph({nodes,links}, {
                   nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
                   nodeGroup, // given d in nodes, returns an (ordinal) value for color
@@ -220,8 +224,7 @@ d3.json('/dataset/characters_nodes.json').then(function(nodesData) {
                       .selectAll("circle")
                       .data(nodes)
                       .join("circle")
-                      .attr("r", nodeRadius)
-                      .call(drag(simulation));
+                      .attr("r", nodeRadius);
                   
                   setWidthScaleDomainAndRange(nodes);
                   setHeightScaleDomainAndRange(nodes);
@@ -249,30 +252,6 @@ d3.json('/dataset/characters_nodes.json').then(function(nodesData) {
                       .attr("cy", d => (d.y));
                   }
                 
-                  function drag(simulation) {    
-                    function dragstarted(event) {
-                      if (!event.active) simulation.alphaTarget(0.3).restart();
-                      event.subject.fx = event.subject.x;
-                      event.subject.fy = event.subject.y;
-                    }
-                    
-                    function dragged(event) {
-                      event.subject.fx = event.x;
-                      event.subject.fy = event.y;
-                    }
-                    
-                    function dragended(event) {
-                      if (!event.active) simulation.alphaTarget(0);
-                      event.subject.fx = null;
-                      event.subject.fy = null;
-                    }
-                    
-                    return d3.drag()
-                      .on("start", dragstarted)
-                      .on("drag", dragged)
-                      .on("end", dragended);
-                  }
-                
                   return Object.assign(svg.node(), {scales: {color}});
                 }
 //--------------------------------------------------------------------------------------------
@@ -293,7 +272,8 @@ d3.json('/dataset/characters_nodes.json').then(function(nodesData) {
                   width,
                   height: 600,
                 });
-              
+            
+                document.body.addEventListener("change", getChapterNumber);
             });
         });
     });
