@@ -1,51 +1,71 @@
 <!DOCTYPE html>
 <html>
-    <link rel="stylesheet" href="style.css">
-    <head>
-        <title>The Hrafnkels saga</title>
-        <h1><b>The Hrafnkels diagrams</b></h1>
-        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-        <meta content="utf-8" http-equiv="encoding">
-    </head>
+<link rel="stylesheet" href="style.css">
 
-    <body>
-        <div id="divForInput">
-            <label class="sliderBar">Select the chapter
-                <div class="range">
-                    <input id="rangeField" type="range" min="1" max="16" value="1" step="1" list="my-datalist"/>
-                    <div class="ticks">
-                      <!-- You could generate the ticks based on your min, max & step values. -->
-                      <span class="tick">1</span>
-                      <span class="tick">2</span>
-                      <span class="tick">3</span>
-                      <span class="tick">4</span>
-                      <span class="tick">5</span>
-                      <span class="tick">6</span>
-                      <span class="tick">7</span>
-                      <span class="tick">8</span>
-                      <span class="tick">9</span>
-                      <span class="tick">10</span>
-                      <span class="tick">11</span>
-                      <span class="tick">12</span>
-                      <span class="tick">13</span>
-                      <span class="tick">14</span>
-                      <span class="tick">15</span>
-                      <span class="tick">16</span>
-                    </div>
+<head>
+    <title>The Hrafnkels saga</title>
+    <h1><b>The Hrafnkels diagrams</b></h1>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+</head>
+
+<body>
+    <div id="divForInput">
+        <label class="sliderBar">Select the chapter
+            <div class="range">
+                <input id="rangeField" type="range" min="1" max="16" value="1" step="1" list="my-datalist" />
+                <div class="ticks">
+                    <!-- You could generate the ticks based on your min, max & step values. -->
+                    <span class="tick">1</span>
+                    <span class="tick">2</span>
+                    <span class="tick">3</span>
+                    <span class="tick">4</span>
+                    <span class="tick">5</span>
+                    <span class="tick">6</span>
+                    <span class="tick">7</span>
+                    <span class="tick">8</span>
+                    <span class="tick">9</span>
+                    <span class="tick">10</span>
+                    <span class="tick">11</span>
+                    <span class="tick">12</span>
+                    <span class="tick">13</span>
+                    <span class="tick">14</span>
+                    <span class="tick">15</span>
+                    <span class="tick">16</span>
                 </div>
-            </label>
-        </div>
-        
-        <div id="divForSvg">
-            <svg id="graph"></svg>
-        </div>
-        <script src="https://d3js.org/d3.v7.min.js"></script>
-        <script src="../javascript/grafo.js"></script>
-    </body>
+            </div>
+        </label>
+    </div>
+    <div>
+        <svg id="my_dataviz" height=300 width=450></svg>
+    </div>
+    <div id="divForSvg">
+        <svg id="graph"></svg>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="../javascript/grafo.js"></script>
+    <script>
 
-    <footer>
-        <div>
-            <i><q>[...] Only shooting stars break the mold...</q></i>
-        </div>
-    </footer>
+        // select the svg area
+        var svg = d3.select("#my_dataviz")
+
+        // Handmade legend
+        svg.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 6).style("fill", "red")
+        svg.append("circle").attr("cx", 200).attr("cy", 160).attr("r", 6).style("fill", "orange")
+        svg.append("circle").attr("cx", 200).attr("cy", 190).attr("r", 6).style("fill", "yellow")
+        svg.append("circle").attr("cx", 200).attr("cy", 210).attr("r", 6).style("fill", "white")
+        svg.append("text").attr("x", 220).attr("y", 130).text("Hostility Level: 3").style("font-size", "15px").attr("alignment-baseline", "middle")
+        svg.append("text").attr("x", 220).attr("y", 160).text("Hostility Level: 2").style("font-size", "15px").attr("alignment-baseline", "middle")
+        svg.append("text").attr("x", 220).attr("y", 190).text("Hostility Level: 1").style("font-size", "15px").attr("alignment-baseline", "middle")
+        svg.append("text").attr("x", 220).attr("y", 210).text("Hostility Level: 0").style("font-size", "15px").attr("alignment-baseline", "middle")
+
+    </script>
+</body>
+
+<footer>
+    <div>
+        <i><q>[...] Only shooting stars break the mold...</q></i>
+    </div>
+</footer>
+
 </html>

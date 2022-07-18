@@ -167,17 +167,17 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     linkStroke = function (links) {
                         switch (links.hostilityLevel) {
                             case 0:
-                                return "#ff0000";
+                                return "white";
                             case 1:
-                                return "#00ff00";
+                                return "yellow";
                             case 2:
-                                return "#0000ff";
+                                return "#orange";
                             case 3:
-                                return "#ffff00";
+                                return "red";
                             default:
-                                return "#ffffff"
+                                return "black"
                         }
-                    }, // link stroke color
+                    }, // link stroke color, scale based on hostility level (from 0 to 3)
                     linkStrokeOpacity = 0.6, // link stroke opacity
                     linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
                     linkStrokeLinecap = "round", // link stroke linecap
