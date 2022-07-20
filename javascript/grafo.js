@@ -180,6 +180,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                                     "chapter": edge["chapter"],
                                     "distance": setDistance(edge["source"], edge["target"], families),
                                     "page": edge["page"],
+                                    "isFamily": action["isFamily"],
                                     "hostilityLevel": action["hostilityLevel"]
                                 };
                                 characterEdges.push(resolvedEdge);
@@ -285,6 +286,9 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
                     linkDistance = ({ distance }) => distance,
                     linkStroke = function (links) {
+
+                        if (links.isFamily === 1)
+                            return "";
                         switch (links.hostilityLevel) {
                             case 0:
                                 return "white";
