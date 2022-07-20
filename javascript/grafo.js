@@ -27,24 +27,138 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                 /**
                  * Creates the graph topology with "resolved" nodes and edges;
                  * in this way, there is no need to use actions indexes and genders codes.
-                 * 
+                 *
                  * @param {nodesData} data that has been taken from characters_nodes.json
                  * @param {edgesData} data that has been taken from characters_edges.json
                  * @param {actions} data that has been taken from actions.json
                  * @param {genderCodes} data that has been taken from gender_codes.json
-                 * @returns a new Array with two elements: 
+                 * @returns a new Array with two elements:
                  *              - an Array for all the nodes (without genders codes)
                  *              - an Array for all the edges (without actions indexes)
                  */
-                function createGraphTopologyArray(nodesData, edgesData, actions, genderCodes) {
+
+
+                function isFamily(actions){
+                  parental_actions=[];
+
+                  actions.forEach(function(azione){
+                    if (azione["isFamily"]==1){
+                      parental_actions.push(azione["action"]);
+                      //console.log(azione);
+                    }
+                  });
+
+                  families = [];
+                  edgesData.forEach(function(general_actions){
+                    //console.log(general_actions["action"])
+                    if(parental_actions.indexOf(general_actions["action"])!=-1){
+
+                      if(families.length==0){
+                        family = [];
+                        family.push(general_actions["source"]);
+                        family.push(general_actions["target"]);
+                        families.push(family);
+                      }
+
+                      else {
+                        aggiunto = 0;
+                        for (i in families){
+                          if(families[i].indexOf(general_actions["source"])!=-1){
+                            if(families[i].indexOf(general_actions["target"])!=-1){
+                              aggiunto=1
+                              continue;
+                            }
+                            else
+                              families[i].push(general_actions["target"])
+                            aggiunto=1
+                          }
+
+                          else if(families[i].indexOf(general_actions["target"])!=-1){
+                            if(families[i].indexOf(general_actions["source"])!=-1){
+                              aggiunto=1
+                              continue;
+                            }
+                            else
+                              families[i].push(general_actions["source"])
+                            aggiunto=1
+                          }
+                        }
+                        if(aggiunto==0){
+                          family = [];
+                          family.push(general_actions["source"]);
+                          family.push(general_actions["target"]);
+                          families.push(family);
+                        }
+                      }
+                    }
+                  });
+                  console.log(families)
+                  return families;
+                }
+
+                function found_family(families, id_character){
+                  for (i in families){
+                    if (families[i].indexOf(id_character)!=-1){
+                      //console.log("id: "+ id_character)
+                      //console.log("famiglia: "+i)
+                      return i;
+                    }
+                  }
+
+                  alone = families.length + parseInt(id_character);
+                  //console.log("id: "+ id_character)
+                  //console.log("famiglia: "+alone)
+
+                  return alone;
+                }
+
+                function createclique(families){
+                  edges = [];
+                  for (i in families){
+
+                    for (j in families[i]){
+                      source = families[i][j];
+
+                      for (h in families[i]){
+                        target = families[i][h]
+                        if(j<h){
+                          var edge = {
+                            "source" : source,
+                            "target" : target,
+                            "distance" : 1
+                          }
+                          //console.log(edge)
+                          edges.push(edge);
+                        }
+                      }
+                    }
+
+                  }
+                  console.log(edges);
+                  return edges;
+                }
+
+                function setDistance(source, target, families){
+                  source_family = found_family(families, source);
+                  target_family = found_family(families, target);
+                  if (source_family == target_family){
+                    return 1;
+                  }
+                  else return 10;
+                }
+
+                function createGraphTopologyArray(nodesData, edgesData, actions, genderCodes){
                     var result = [];
 
                     var characterNodes = [];
                     var characterEdges = [];
+                    var familyEdges = [];
 
-                    nodesData.forEach(function (character) {
-                        genderCodes.forEach(function (gender) {
-                            if (character["gender"] == gender["gender"]) {
+                    families = isFamily(actions);
+
+                    nodesData.forEach(function(character) {
+                        genderCodes.forEach(function(gender) {
+                            if(character["gender"] == gender["gender"]){
                                 var resolvedCharacter = {
                                     "id": character["id"],
                                     "label": character["label"],
@@ -60,10 +174,11 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         actions.forEach(function (action) {
                             if (edge["action"] == action["action"]) {
                                 var resolvedEdge = {
-                                    "source": edge["source"],
-                                    "target": edge["target"],
-                                    "action": action["action description"],
-                                    "chapter": edge["chapter"],
+                                    "source":edge["source"],
+                                    "target":edge["target"],
+                                    "action":action["action description"],
+                                    "chapter":edge["chapter"],
+                                    "distance":setDistance(edge["source"], edge["target"], families),
                                     "page": edge["page"],
                                     "hostilityLevel": action["hostilityLevel"]
                                 };
@@ -71,8 +186,12 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                             }
                         })
                     })
+
+                    familyEdges = createclique(families);
+
                     result[0] = characterNodes;
                     result[1] = characterEdges;
+                    result[2] = familyEdges;
                     return result;
                 }
 
@@ -93,8 +212,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
 
                 /**
-                 * @param {characterId} the unique identifier for a character 
-                 * @param {nodes} the Array of nodes 
+                 * @param {characterId} the unique identifier for a character
+                 * @param {nodes} the Array of nodes
                  * @returns all the character's informations
                  */
                 function getCharacterById(characterId, nodes) {
@@ -104,8 +223,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                 /**
                  * This function changes the color of a particular given node
-                 * @param {node} the unique identifier for a node 
-                 * @param {color} a string related to a color (in RGB) 
+                 * @param {node} the unique identifier for a node
+                 * @param {color} a string related to a color (in RGB)
                  */
                 function updateNodesColor(node, color) {
                     for (var i = 0; i < nodesData.length; i++) {
@@ -118,7 +237,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
 
                 /**
-                 * Starting from a circle list, this function gets the maximum and the minimum values of 
+                 * Starting from a circle list, this function gets the maximum and the minimum values of
                  * circles' centers' horizontal position and sets the corresponding scale's domain and range
                  * @param {circles} the list of circles
                  */
@@ -133,7 +252,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
 
                 /**
-                 * Starting from a circle list, this function gets the maximum and the minimum values of 
+                 * Starting from a circle list, this function gets the maximum and the minimum values of
                  * circles' centers' vertical position and sets the corresponding scale's domain and range
                  * @param {circles} the list of circles
                  */
@@ -151,19 +270,20 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     chapterNumber = document.querySelector('#rangeField').value;
                 }
 
-                function ForceGraph({ nodes, links }, {
-                    nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
-                    nodeGroup, // given d in nodes, returns an (ordinal) value for color
-                    nodeGroups, // an array of ordinal values representing the node groups
-                    nodeTitle, // given d in nodes, a title string
-                    nodeFill = "currentColor", // node stroke fill (if not using a group color encoding)
-                    nodeStroke = "#fff", // node stroke color
-                    nodeStrokeWidth = 1.5, // node stroke width, in pixels
-                    nodeStrokeOpacity = 1, // node stroke opacity
-                    nodeRadius = 5, // node radius, in pixels
-                    nodeStrength,
-                    linkSource = ({ source }) => source, // given d in links, returns a node identifier string
-                    linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
+                function ForceGraph({nodes,links,family}, {
+                  nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
+                  nodeGroup, // given d in nodes, returns an (ordinal) value for color
+                  nodeGroups, // an array of ordinal values representing the node groups
+                  nodeTitle, // given d in nodes, a title string
+                  nodeFill = "currentColor", // node stroke fill (if not using a group color encoding)
+                  nodeStroke = "#fff", // node stroke color
+                  nodeStrokeWidth = 1.5, // node stroke width, in pixels
+                  nodeStrokeOpacity = 1, // node stroke opacity
+                  nodeRadius = 5, // node radius, in pixels
+                  nodeStrength,
+                  linkSource = ({source}) => source, // given d in links, returns a node identifier string
+                  linkTarget = ({target}) => target, // given d in links, returns a node identifier string
+                  linkDistance = ({distance}) => distance,
                     linkStroke = function (links) {
                         switch (links.hostilityLevel) {
                             case 0:
@@ -178,101 +298,115 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                                 return "black"
                         }
                     }, // link stroke color, scale based on hostility level (from 0 to 3)
-                    linkStrokeOpacity = 0.6, // link stroke opacity
-                    linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
-                    linkStrokeLinecap = "round", // link stroke linecap
-                    linkStrength,
-                    colors = d3.schemeTableau10, // an array of color strings, for the node groups
-                    width = 640, // outer width, in pixels
-                    height = 400, // outer height, in pixels
-                    invalidation // when this promise resolves, stop the simulation
-                } = {}) {
-                    // Compute values.
-                    const N = d3.map(nodes, nodeId).map(intern);
-                    const LS = d3.map(links, linkSource).map(intern);
-                    const LT = d3.map(links, linkTarget).map(intern);
-                    if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
-                    const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
-                    const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
-                    const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
-                    const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
+                  linkStrokeOpacity = 0.6, // link stroke opacity
+                  linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
+                  linkStrokeLinecap = "round", // link stroke linecap
+                  linkStrength,
+                  colors = d3.schemeTableau10, // an array of color strings, for the node groups
+                  width = 640, // outer width, in pixels
+                  height = 400, // outer height, in pixels
+                  invalidation, // when this promise resolves, stop the simulation
+                  familySource = ({source}) => source,
+                  familyTarget = ({target}) => target,
+                  familyDistance = ({distance}) => distance
+                  } = {}) {
 
-                    // Replace the input nodes and links with mutable objects for the simulation.
-                    nodes = d3.map(nodes, (_, i) => ({ id: N[i] }));
-                    links = d3.map(links, (_, i) => ({ source: LS[i], target: LT[i] }));
+                  // Compute values.
+                  const N = d3.map(nodes, nodeId).map(intern);
+                  const LS = d3.map(links, linkSource).map(intern);
+                  const LT = d3.map(links, linkTarget).map(intern);
+                  const LD = d3.map(links, linkDistance).map(intern);
+                  if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
+                  const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
+                  const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
+                  const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
+                  const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
+                  const FD = d3.map(family, familyDistance).map(intern);
+                  const FS = d3.map(family, familySource).map(intern);
+                  const FT = d3.map(family, familyTarget).map(intern);
 
-                    // Compute default domains.
-                    if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
+                  // Replace the input nodes and links with mutable objects for the simulation.
+                  nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
+                  links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i]}));
+                  familyLinks = d3.map(family, (_, i) => ({source: FS[i], target: FT[i]}));
 
-                    // Construct the scales.
-                    const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
+                  // Compute default domains.
+                  if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
 
-                    // Construct the forces.
-                    const forceNode = d3.forceManyBody();
-                    const forceLink = d3.forceLink(links).id(({ index: i }) => N[i]);
-                    if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
-                    if (linkStrength !== undefined) forceLink.strength(linkStrength);
+                  // Construct the scales.
+                  const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
 
-                    const simulation = d3.forceSimulation(nodes)
-                        .force("link", forceLink)
-                        .force("charge", forceNode)
-                        .force("center", d3.forceCenter())
-                        .on("tick", ticked);
+                  // Construct the forces.
+                  const forceNode = d3.forceManyBody();
+                  const forceLink = d3.forceLink(links).id(({index: i}) => N[i]);
+                  const forceFamilyLink = d3.forceLink(familyLinks).id(({index: i}) => N[i]).distance(({index: i}) => FD[i]).strength(0.1);
+                  if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
+                  if (linkStrength !== undefined){
+                    forceLink.strength(linkStrength);
+                    forceFamilyLink.strength(linkStrength);
+                  }
 
-                    svg
-                        .attr("viewBox", [-width / 2, -height / 2, width, height])
-                        .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+                  const simulation = d3.forceSimulation(nodes)
+                      .force("link", forceLink)
+                      .force("link", forceFamilyLink)
+                      .force("charge", forceNode)
+                      .force("center",  d3.forceCenter())
+                      .on("tick", ticked);
 
-                    const link = svg.append("g")
-                        .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
-                        .attr("stroke-opacity", linkStrokeOpacity)
-                        .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
-                        .attr("stroke-linecap", linkStrokeLinecap)
-                        .selectAll("line")
-                        .data(links)
-                        .join("line");
+                  svg
+                      .attr("viewBox", [-width / 2, -height / 2, width, height])
+                      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-                    const node = svg.append("g")
-                        .attr("fill", nodeFill)
-                        .attr("stroke", nodeStroke)
-                        .attr("stroke-opacity", nodeStrokeOpacity)
-                        .attr("stroke-width", nodeStrokeWidth)
-                        .selectAll("circle")
-                        .data(nodes)
-                        .join("circle")
-                        .attr("r", nodeRadius);
+                  const link = svg.append("g")
+                      .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
+                      .attr("stroke-opacity", linkStrokeOpacity)
+                      .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
+                      .attr("stroke-linecap", linkStrokeLinecap)
+                      .selectAll("line")
+                      .data(links)
+                      .join("line");
 
-                    setWidthScaleDomainAndRange(nodes);
-                    setHeightScaleDomainAndRange(nodes);
-                    console.log(svgHeightScale(10));
+                  const node = svg.append("g")
+                      .attr("fill", nodeFill)
+                      .attr("stroke", nodeStroke)
+                      .attr("stroke-opacity", nodeStrokeOpacity)
+                      .attr("stroke-width", nodeStrokeWidth)
+                      .selectAll("circle")
+                      .data(nodes)
+                      .join("circle")
+                      .attr("r", nodeRadius);
 
-                    if (W) link.attr("stroke-width", ({ index: i }) => W[i]);
-                    if (L) link.attr("stroke", ({ index: i }) => L[i]);
-                    if (G) node.attr("fill", ({ index: i }) => color(G[i]));
-                    if (T) node.append("title").text(({ index: i }) => T[i]);
-                    if (invalidation != null) invalidation.then(() => simulation.stop());
+                  setWidthScaleDomainAndRange(nodes);
+                  setHeightScaleDomainAndRange(nodes);
+                  console.log(svgHeightScale(10));
 
-                    function intern(value) {
-                        return value !== null && typeof value === "object" ? value.valueOf() : value;
-                    }
+                  if (W) link.attr("stroke-width", ({index: i}) => W[i]);
+                  if (L) link.attr("stroke", ({index: i}) => L[i]);
+                  if (G) node.attr("fill", ({index: i}) => color(G[i]));
+                  if (T) node.append("title").text(({index: i}) => T[i]);
+                  if (invalidation != null) invalidation.then(() => simulation.stop());
 
-                    function ticked() {
-                        link
-                            .attr("x1", d => (d.source.x))
-                            .attr("y1", d => (d.source.y))
-                            .attr("x2", d => (d.target.x))
-                            .attr("y2", d => (d.target.y))
+                  function intern(value) {
+                    return value !== null && typeof value === "object" ? value.valueOf() : value;
+                  }
+
+                  function ticked() {
+                    link
+                      .attr("x1", d => (d.source.x))
+                      .attr("y1", d => (d.source.y))
+                      .attr("x2", d => (d.target.x))
+                      .attr("y2", d => (d.target.y));
                             .attr("hostilityLevel", function (d) {
 
                                 return d.hostilityLevel;
                             });
 
-                        node
-                            .attr("cx", d => (d.x))
-                            .attr("cy", d => (d.y));
-                    }
+                    node
+                      .attr("cx", d => (d.x))
+                      .attr("cy", d => (d.y));
+                  }
 
-                    return Object.assign(svg.node(), { scales: { color } });
+                  return Object.assign(svg.node(), {scales: {color}});
                 }
                 //--------------------------------------------------------------------------------------------
                 // INPUT ADJUSTEMENTS
@@ -282,15 +416,16 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                 var result = createGraphTopologyArray(nodesData, edgesData, actionsData, gendersData);
                 var nodes = result[0];
                 var links = result[1];
+                var family = result[2];
 
 
-                chart = ForceGraph({ nodes, links }, {
-                    nodeId: d => d.id,
-                    nodeGroup: d => d.group,
-                    nodeTitle: d => `${d.id}\n${d.group}`,
-                    linkStrokeWidth: l => Math.sqrt(l.value),
-                    width,
-                    height: 600,
+                chart = ForceGraph({nodes, links, family}, {
+                  nodeId: d => d.id,
+                  nodeGroup: d => d.group,
+                  nodeTitle: d => `${d.id}\n${d.group}`,
+                  linkStrokeWidth: l => Math.sqrt(l.value),
+                  width,
+                  height: 600,
                 });
 
                 document.body.addEventListener("change", getChapterNumber);
