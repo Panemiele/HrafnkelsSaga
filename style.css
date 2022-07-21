@@ -15,6 +15,7 @@ h1 {
 }
 
 .link{
+    stroke-width: 5.5px;
     stroke: grey;
 }
 

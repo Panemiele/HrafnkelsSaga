@@ -5,7 +5,7 @@ var width = 800 - margin.left - margin.right;
 var height = 800 - margin.top - margin.bottom;
 var updateTime = 1000; // time for transitions
 var imageSize = 40;
-var chapterNumber = 1;
+var chapterNumber = parseInt(document.querySelector('#rangeField').value);
 
 // Scales definitions
 var svgHeightScale = d3.scaleLinear();
@@ -44,13 +44,11 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     actions.forEach(function (azione) {
                         if (azione["isFamily"] == 1) {
                             parental_actions.push(azione["action"]);
-                            //console.log(azione);
                         }
                     });
 
                     families = [];
                     edgesData.forEach(function (general_actions) {
-                        //console.log(general_actions["action"])
                         if (parental_actions.indexOf(general_actions["action"]) != -1) {
 
                             if (families.length == 0) {
@@ -92,22 +90,17 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                             }
                         }
                     });
-                    console.log(families)
                     return families;
                 }
 
                 function found_family(families, id_character) {
                     for (i in families) {
                         if (families[i].indexOf(id_character) != -1) {
-                            //console.log("id: "+ id_character)
-                            //console.log("famiglia: "+i)
                             return i;
                         }
                     }
 
                     alone = families.length + parseInt(id_character);
-                    //console.log("id: "+ id_character)
-                    //console.log("famiglia: "+alone)
 
                     return alone;
                 }
@@ -127,14 +120,12 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                                         "target": target,
                                         "distance": 1
                                     }
-                                    //console.log(edge)
                                     edges.push(edge);
                                 }
                             }
                         }
 
                     }
-                    //console.log(edges);
                     return edges;
                 }
 
@@ -243,10 +234,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                  * @param {circles} the list of circles
                  */
                 function setWidthScaleDomainAndRange(circles) {
-                    console.log(circles);
                     maxCoordX = d3.max(circles, function (d) { return d.x });
                     minCoordX = d3.min(circles, function (d) { return d.x });
-                    console.log(minCoordX + "   " + maxCoordX);
                     svgWidthScale.domain([minCoordX - 100, maxCoordX + 100]);
                     svgWidthScale.range([minCoordX, width - maxCoordX - 40]);
                 }
@@ -258,23 +247,21 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                  * @param {circles} the list of circles
                  */
                 function setHeightScaleDomainAndRange(circles) {
-                    console.log(circles);
-
                     maxCoordY = d3.max(circles, function (d) { return d.y });
                     minCoordY = d3.min(circles, function (d) { return d.y });
-                    console.log(minCoordY + "   " + maxCoordX);
                     svgHeightScale.domain([minCoordY, maxCoordY])
                     svgHeightScale.range([0, height - nodeRadius - 40]);
                 }
 
                 function updateGraph() {
-                    chapterNumber = document.querySelector('#rangeField').value;
+                    chapterNumber = parseInt(document.querySelector('#rangeField').value);
+                    console.log("chapterNumber: " + chapterNumber);
                     svg.selectAll(".node").remove();
-                    chart = ForceGraph({ nodes, links, family, chapterNumber }, {
+                    svg.selectAll(".link").remove();
+                    chart = ForceGraph({ nodes, links, family }, {
                         nodeId: d => d.id,
                         nodeGroup: d => d.group,
                         nodeTitle: d => `${d.id}\n${d.group}`,
-                        linkStrokeWidth: l => Math.sqrt(l.value),
                         width,
                         height: 600,
                     });
@@ -283,18 +270,31 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                 function selectNodesInChapter(nodesInChapter){
                     var temp = []
                     for(i in nodesInChapter){
-                        if(nodesInChapter[i][1] == null || nodesInChapter[i][1] <= chapterNumber){
+                        var nodeChapter = nodesInChapter[i][1];
+                        if(nodeChapter == null || nodeChapter <= chapterNumber){
                             temp.push({id: nodesInChapter[i][0]});
                         }
                     }
                     return temp;
                 }
 
-                function selectLinksInChapter(linksInChapter){
+                function selectLinksInChapter(linksInChapter, nodesInChapter){
                     var temp = [];
+                    var nodesIds = [];
+
+                    for(i in nodesInChapter){
+                        nodesIC = parseInt(nodesInChapter[i].id)
+                        nodesIds.push(nodesIC)
+                    }
+
                     for(i in linksInChapter){
-                        if(linksInChapter[i][2] <= chapterNumber){
-                            temp.push({source: linksInChapter[i][0], target: linksInChapter[i][1]});
+
+                        source = linksInChapter[i][0];
+                        target = linksInChapter[i][1];
+                        chapter = linksInChapter[i][2];
+
+                        if(linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)){
+                            temp.push({source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2]});
                         }
                     }
                     return temp;
@@ -305,27 +305,23 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     var nodesIds = [];
 
                     for(i in nodesInChapter){
-                        nodes = parseInt(nodesInChapter[i].id)
-                        nodesIds.push(nodes)
+                        nodesIC = parseInt(nodesInChapter[i].id)
+                        nodesIds.push(nodesIC)
                     }
 
-                    //console.log("nodi del capitolo: "+ nodesIds)
                     for(i in familyLinksInChapter){
 
                       source = familyLinksInChapter[i][0]
                       target = familyLinksInChapter[i][1]
 
-                      //console.log("arco "+i+": "+source+","+target)
                         if((nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)){
-                            //console.log("è dentro")
                             temp.push({source: source, target: target});
                         }
                     }
-                    //console.log(temp);
                     return temp;
                 }
 
-                function ForceGraph({ nodes, links, family, chapterNumber}, {
+                function ForceGraph({ nodes, links, family}, {
                     nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
                     nodeGroup, // given d in nodes, returns an (ordinal) value for color
                     nodeGroups, // an array of ordinal values representing the node groups
@@ -341,14 +337,13 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
                     linkDistance = ({ distance }) => distance,
                     linkStroke = function (links) {
-
-                        if (links.isFamily === 1)
+                        if (links.isFamily == 1)
                             return "";
                         switch (links.hostilityLevel) {
                             case 0:
-                                return "white";
+                                return "green";
                             case 1:
-                                return "yellow";
+                                return "white";
                             case 2:
                                 return "#orange";
                             case 3:
@@ -357,8 +352,11 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                                 return "black"
                         }
                     }, // link stroke color, scale based on hostility level (from 0 to 3)
-                    linkStrokeOpacity = 0.6, // link stroke opacity
-                    linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
+                    linkStrokeOpacity = (link) => Object.values(link["chapter"]) == chapterNumber ? 0.85 : 0.25, // link stroke opacity
+                    linkStrokeWidth = (link) => {
+                        console.log("chapter: " + Object.values(link["chapter"]) + "   chapterNumber: " + parseInt(chapterNumber));
+                        console.log(Object.values(link["chapter"]) == parseInt(chapterNumber));
+                        return Object.values(link["chapter"]) == parseInt(chapterNumber) ? 5 : 1}, // given d in links, returns a stroke width in pixels
                     linkStrokeLinecap = "round", // link stroke linecap
                     linkStrength,
                     linkChapter = ({chapter}) => chapter,
@@ -381,7 +379,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
                     const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
                     const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
-                    const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
+                    const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, l => linkStrokeWidth(l));
+
                     const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
                     const FD = d3.map(family, familyDistance).map(intern);
                     const FS = d3.map(family, familySource).map(intern);
@@ -394,12 +393,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
                     nodesInChapter = selectNodesInChapter(nodesInChapter);
-                    linksInChapter = selectLinksInChapter(linksInChapter);
+                    linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
                     familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
-
-                    console.log(nodesInChapter)
-                    console.log(linksInChapter)
-                    console.log(familyLinkInChapter)
 
                     // Compute default domains.
                     if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
@@ -429,15 +424,17 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
                     const link = svg.append("g")
+                        .attr("class", "link")
                         .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
-                        .attr("stroke-opacity", linkStrokeOpacity)
-                        .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
                         .attr("stroke-linecap", linkStrokeLinecap)
                         .selectAll("line")
                         .data(linksInChapter)
-                        .join("line");
+                        .join("line")
+                        .attr("stroke-width", link => linkStrokeWidth(link))
+                        .attr("stroke-opacity", link => linkStrokeOpacity(link));
 
                     const node = svg.append("g")
+                        .attr("class", "node")
                         .attr("fill", nodeFill)
                         .attr("stroke", nodeStroke)
                         .attr("stroke-opacity", nodeStrokeOpacity)
@@ -445,13 +442,13 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         .selectAll("circle")
                         .data(nodesInChapter)
                         .join("circle")
-                        .attr("r", nodeRadius);
+                        .attr("r", nodeRadius)
+                        .append("text")
+                        .text(d => d.label);
 
                     setWidthScaleDomainAndRange(nodesInChapter);
                     setHeightScaleDomainAndRange(nodesInChapter);
-                    console.log(svgHeightScale(10));
 
-                    if (W) link.attr("stroke-width", ({ index: i }) => W[i]);
                     if (L) link.attr("stroke", ({ index: i }) => L[i]);
                     if (G) node.attr("fill", ({ index: i }) => color(G[i]));
                     if (T) node.append("title").text(({ index: i }) => T[i]);
@@ -489,13 +486,12 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                 var family = result[2];
 
 
-                chart = ForceGraph({ nodes, links, family, chapterNumber}, {
+                chart = ForceGraph({ nodes, links, family}, {
                     nodeId: d => d.id,
                     nodeGroup: d => d.group,
                     nodeTitle: d => `${d.id}\n${d.group}`,
-                    linkStrokeWidth: l => Math.sqrt(l.value),
                     width,
-                    height: 600,
+                    height,
                 });
 
                 document.body.addEventListener("change", updateGraph);

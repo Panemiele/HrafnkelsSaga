@@ -37,8 +37,8 @@
         </label>
     </div>
 
-    <div>
-        <svg id="my_dataviz" height=300 width=450></svg>
+    <div id="legend">
+        <svg id="my_dataviz" height=300 width=1000></svg>
     </div>
 
     <div id="divForSvg">
@@ -51,14 +51,15 @@
         var svg = d3.select("#my_dataviz")
 
         // Handmade legend
-        svg.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 6).style("fill", "red")
-        svg.append("circle").attr("cx", 200).attr("cy", 160).attr("r", 6).style("fill", "orange")
-        svg.append("circle").attr("cx", 200).attr("cy", 190).attr("r", 6).style("fill", "yellow")
-        svg.append("circle").attr("cx", 200).attr("cy", 220).attr("r", 6).style("fill", "white")
-        svg.append("text").attr("x", 220).attr("y", 130).text("Hostility Level: 3").style("font-size", "15px").attr("alignment-baseline", "middle")
-        svg.append("text").attr("x", 220).attr("y", 160).text("Hostility Level: 2").style("font-size", "15px").attr("alignment-baseline", "middle")
-        svg.append("text").attr("x", 220).attr("y", 190).text("Hostility Level: 1").style("font-size", "15px").attr("alignment-baseline", "middle")
-        svg.append("text").attr("x", 220).attr("y", 220).text("Hostility Level: 0").style("font-size", "15px").attr("alignment-baseline", "middle")
+        svg.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 6).style("fill", "white")
+        svg.append("circle").attr("cx", 200).attr("cy", 160).attr("r", 6).style("fill", "green")
+        svg.append("circle").attr("cx", 200).attr("cy", 190).attr("r", 6).style("fill", "orange")
+        svg.append("circle").attr("cx", 200).attr("cy", 220).attr("r", 6).style("fill", "red")
+        svg.append("text").attr("x", 220).attr("y", 100).text("Hostility Level ---> Color").style("font-size", "30px").attr("alignment-baseline", "left")
+        svg.append("text").attr("x", 220).attr("y", 130).text("Neutral").style("font-size", "15px").attr("alignment-baseline", "middle")
+        svg.append("text").attr("x", 220).attr("y", 160).text("Good: ").style("font-size", "15px").attr("alignment-baseline", "middle")
+        svg.append("text").attr("x", 220).attr("y", 190).text("Bad").style("font-size", "15px").attr("alignment-baseline", "middle")
+        svg.append("text").attr("x", 220).attr("y", 220).text("Very bad").style("font-size", "15px").attr("alignment-baseline", "middle")
 
     </script>
     <script src="../javascript/grafo.js"></script>
