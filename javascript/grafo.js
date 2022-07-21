@@ -134,7 +134,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         }
 
                     }
-                    console.log(edges);
+                    //console.log(edges);
                     return edges;
                 }
 
@@ -282,7 +282,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                 function selectNodesInChapter(nodesInChapter){
                     var temp = []
-                    for(var i=0; i<nodesInChapter.length; i++){
+                    for(i in nodesInChapter){
                         if(nodesInChapter[i][1] == null || nodesInChapter[i][1] <= chapterNumber){
                             temp.push({id: nodesInChapter[i][0]});
                         }
@@ -292,9 +292,9 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                 function selectLinksInChapter(linksInChapter){
                     var temp = [];
-                    for(var i=0; i<linksInChapter.length; i++){
+                    for(i in linksInChapter){
                         if(linksInChapter[i][2] <= chapterNumber){
-                            temp.push({source: linksInChapter[i][0], target: linksInChapter[i][1]}); 
+                            temp.push({source: linksInChapter[i][0], target: linksInChapter[i][1]});
                         }
                     }
                     return temp;
@@ -303,19 +303,25 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                 function selectFamilyLinksInChapter(familyLinksInChapter, nodesInChapter){
                     var temp = [];
                     var nodesIds = [];
-                    console.log("familyyyyyyy: " + Object.values(familyLinksInChapter[0].target));
-                    for(var i=0; i<nodesInChapter.length; i++){
-                        nodesIds.push(Object.values(nodesInChapter[i]))
+
+                    for(i in nodesInChapter){
+                        nodes = parseInt(nodesInChapter[i].id)
+                        nodesIds.push(nodes)
                     }
-                    console.log("nodi: " + nodesIds);
-                    for(var i=0; i<familyLinksInChapter.length; i++){
-                        console.log("entrato: " + familyLinksInChapter[i][1]);
-                        console.log("vero? " + nodesIds.indexOf(familyLinksInChapter[i].source) != -1 && nodesIds.indexOf(familyLinksInChapter[i].target) != -1);
-                        if((nodesIds.indexOf(familyLinksInChapter[i][0]) != -1) && (nodesIds.indexOf(familyLinksInChapter[i][1]) != -1)){
-                            temp.push({source: familyLinksInChapter[i].source, target: familyLinksInChapter[i].target});
+
+                    //console.log("nodi del capitolo: "+ nodesIds)
+                    for(i in familyLinksInChapter){
+
+                      source = familyLinksInChapter[i][0]
+                      target = familyLinksInChapter[i][1]
+
+                      //console.log("arco "+i+": "+source+","+target)
+                        if((nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)){
+                            //console.log("è dentro")
+                            temp.push({source: source, target: target});
                         }
                     }
-                    console.log(Object.values(temp));
+                    //console.log(temp);
                     return temp;
                 }
 
@@ -383,16 +389,17 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                     // Replace the input nodes and links with mutable objects for the simulation.
 
-
                     nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i]]));
                     linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i]]));
-                    familyLinks = d3.map(family, (_, i) => ({"source": FS[i], "target": FT[i]}));
-
+                    familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
                     nodesInChapter = selectNodesInChapter(nodesInChapter);
                     linksInChapter = selectLinksInChapter(linksInChapter);
                     familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
 
+                    console.log(nodesInChapter)
+                    console.log(linksInChapter)
+                    console.log(familyLinkInChapter)
 
                     // Compute default domains.
                     if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
@@ -402,8 +409,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                     // Construct the forces.
                     const forceNode = d3.forceManyBody();
-                    const forceLink = d3.forceLink(linksInChapter).id(({ index: i }) => nodesInChapter[i]);
-                    const forceFamilyLink = d3.forceLink(familyLinkInChapter).id(({ index: i }) => nodesInChapter[i]).distance(1).strength(0.1);
+                    const forceLink = d3.forceLink(linksInChapter).id(({ index: i }) => nodesInChapter[i].id);
+                    const forceFamilyLink = d3.forceLink(familyLinkInChapter).id(({ index: i }) => nodesInChapter[i].id).distance(1).strength(0.1);
                     if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
                     if (linkStrength !== undefined) {
                         forceLink.strength(linkStrength);
