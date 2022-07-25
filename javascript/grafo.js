@@ -453,7 +453,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         .on("tick", ticked);
 
                     svg
-                        .attr("viewBox", [-width / 2, -height / 2, width, height])
+                        // .attr("viewBox", [-width / 2, -height / 2, width, height])
                         .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
                     const link = svg.append("g")
@@ -476,7 +476,13 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         .selectAll("circle")
                         .data(nodesInChapter)
                         .join("circle")
-                        .attr("r", nodeRadius);
+                        .attr("r", nodeRadius)
+                        .on("click", function (d) {
+                            console.log(d3.select(this).attr("id"));
+
+                            svg.append("rect").attr("x", "5.7%").attr("y", 300).attr("width", 400).attr("height", 200).style("fill", "white")
+                        });
+
 
                     svg.call(d3.zoom()
                         .scaleExtent([1 / 2, 8])
@@ -514,6 +520,12 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     function zoomGraph(event) {
                         node.attr("transform", event.transform);
                         link.attr("transform", event.transform);
+                    }
+
+                    function displayNames(d) {
+                        console.log(d);
+
+                        svg.append("rect").attr("x", "5.7%").attr("y", 300).attr("width", 400).attr("height", 200).style("fill", "white")
                     }
 
                     return Object.assign(svg.node(), { scales: { color } });
