@@ -6,6 +6,14 @@ h1 {
     text-align: center;
 }
 
+#resetButton{
+   top:51%;
+   left:55%;
+   width:100px;
+   height:40px;
+   position: absolute;
+}
+
 #divForSvg{
     text-align: center;
 }
