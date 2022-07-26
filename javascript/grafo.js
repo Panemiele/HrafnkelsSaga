@@ -1,12 +1,13 @@
 // Variables definitions
 var nodeRadius = 20;
-var margin = { top: 80, right: 20, bottom: 80, left: 40 }; // to memorize the margins
-var width = 800 - margin.left - margin.right;
-var height = 800 - margin.top - margin.bottom;
+var margin = { top: 40, right: 20, bottom: 40, left: 20 }; // to memorize the margins
+var width = "100%";
+var height = 800;
 var updateTime = 1000; // time for transitions
 var imageSize = 40;
-var chapterNumber = 1;
-
+var chapterNumber = parseInt(document.querySelector('#rangeField').value);
+var xCenter = 1000,
+    yCenter = 400;
 // Scales definitions
 var svgHeightScale = d3.scaleLinear();
 var svgWidthScale = d3.scaleLinear();
@@ -44,13 +45,11 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     actions.forEach(function (azione) {
                         if (azione["isFamily"] == 1) {
                             parental_actions.push(azione["action"]);
-                            //console.log(azione);
                         }
                     });
 
                     families = [];
                     edgesData.forEach(function (general_actions) {
-                        //console.log(general_actions["action"])
                         if (parental_actions.indexOf(general_actions["action"]) != -1) {
 
                             if (families.length == 0) {
@@ -92,22 +91,17 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                             }
                         }
                     });
-                    console.log(families)
                     return families;
                 }
 
                 function found_family(families, id_character) {
                     for (i in families) {
                         if (families[i].indexOf(id_character) != -1) {
-                            //console.log("id: "+ id_character)
-                            //console.log("famiglia: "+i)
                             return i;
                         }
                     }
 
                     alone = families.length + parseInt(id_character);
-                    //console.log("id: "+ id_character)
-                    //console.log("famiglia: "+alone)
 
                     return alone;
                 }
@@ -125,16 +119,14 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                                     var edge = {
                                         "source": source,
                                         "target": target,
-                                        "distance": 1
+                                        "distance": 5
                                     }
-                                    //console.log(edge)
                                     edges.push(edge);
                                 }
                             }
                         }
 
                     }
-                    console.log(edges);
                     return edges;
                 }
 
@@ -243,12 +235,11 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                  * @param {circles} the list of circles
                  */
                 function setWidthScaleDomainAndRange(circles) {
-                    console.log(circles);
-                    maxCoordX = d3.max(circles, function (d) { return d.x });
+                    maxCoordX = d3.max(circles, function (d) { console.log("d.x: " + d.x); return d.x });
                     minCoordX = d3.min(circles, function (d) { return d.x });
-                    console.log(minCoordX + "   " + maxCoordX);
-                    svgWidthScale.domain([minCoordX - 100, maxCoordX + 100]);
-                    svgWidthScale.range([minCoordX, width - maxCoordX - 40]);
+                    console.log("ciao " + minCoordX + " - " + maxCoordX);
+                    svgWidthScale.domain([minCoordX, maxCoordX]);
+                    svgWidthScale.range([-370, 370]);
                 }
 
 
@@ -258,21 +249,96 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                  * @param {circles} the list of circles
                  */
                 function setHeightScaleDomainAndRange(circles) {
-                    console.log(circles);
-
                     maxCoordY = d3.max(circles, function (d) { return d.y });
                     minCoordY = d3.min(circles, function (d) { return d.y });
-                    console.log(minCoordY + "   " + maxCoordX);
                     svgHeightScale.domain([minCoordY, maxCoordY])
-                    svgHeightScale.range([0, height - nodeRadius - 40]);
+                    svgHeightScale.range([-320, 320]);
                 }
 
-                function getChapterNumber() {
-                    chapterNumber = document.querySelector('#rangeField').value;
+                function updateGraph() {
+                    chapterNumber = parseInt(document.querySelector('#rangeField').value);
+                    console.log("chapterNumber: " + chapterNumber);
+                    svg.selectAll(".nodes").remove();
+                    svg.selectAll(".links").remove();
+                    chart = ForceGraph({ nodes, links, family }, {
+                        nodeId: d => d.id,
+                        nodeGroup: d => d.group,
+                        nodeTitle: d => `${d.id}\n${d.group}`,
+                        width,
+                        height: 600,
+                    });
+                }
+
+                function selectNodesInChapter(nodesInChapter) {
+                    var temp = []
+                    for (i in nodesInChapter) {
+                        var nodeChapter = nodesInChapter[i][1];
+                        if (nodeChapter == null || nodeChapter <= chapterNumber) {
+                            temp.push({ id: nodesInChapter[i][0], chapter: nodesInChapter[i][1], label: nodesInChapter[i][2], gender: nodesInChapter[i][3]});
+                        }
+                    }
+                    return temp;
+                }
+
+                function selectLinksInChapter(linksInChapter, nodesInChapter) {
+                    var temp = [];
+                    var nodesIds = [];
+
+                    for (i in nodesInChapter) {
+                        nodesIC = parseInt(nodesInChapter[i].id)
+                        nodesIds.push(nodesIC)
+                    }
+
+                    for (i in linksInChapter) {
+
+                        source = linksInChapter[i][0];
+                        target = linksInChapter[i][1];
+                        chapter = linksInChapter[i][2];
+
+                        if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
+                            temp.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2] });
+                        }
+                    }
+                    return temp;
+                }
+
+                function selectFamilyLinksInChapter(familyLinksInChapter, nodesInChapter) {
+                    var temp = [];
+                    var nodesIds = [];
+
+                    for (i in nodesInChapter) {
+                        nodesIC = parseInt(nodesInChapter[i].id)
+                        nodesIds.push(nodesIC)
+                    }
+
+                    for (i in familyLinksInChapter) {
+
+                        source = familyLinksInChapter[i][0]
+                        target = familyLinksInChapter[i][1]
+
+                        if ((nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
+                            temp.push({ source: source, target: target });
+                        }
+                    }
+                    return temp;
+                }
+
+                function sortLinks(linksToSort) {
+                    return linksToSort.sort(function (a, b) {
+                        if (a.source > b.source) { return 1; }
+                        else if (a.source < b.source) { return -1; }
+                        else {
+                            if (a.target > b.target) { return 1; }
+                            if (a.target < b.target) { return -1; }
+                            else { return 0; }
+                        }
+                    });
                 }
 
                 function ForceGraph({ nodes, links, family }, {
                     nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
+                    nodeLabel = d => d.label,
+                    nodeGender = d => d.gender,
                     nodeGroup, // given d in nodes, returns an (ordinal) value for color
                     nodeGroups, // an array of ordinal values representing the node groups
                     nodeTitle, // given d in nodes, a title string
@@ -282,33 +348,32 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     nodeStrokeOpacity = 1, // node stroke opacity
                     nodeRadius = 5, // node radius, in pixels
                     nodeStrength,
+                    nodeChapter = ({ chapter }) => chapter,
                     linkSource = ({ source }) => source, // given d in links, returns a node identifier string
                     linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
                     linkDistance = ({ distance }) => distance,
                     linkStroke = function (links) {
-
-                        if (links.isFamily === 1)
-                            return "";
+                        if (links.isFamily == 1)
+                            return "transparent";
                         switch (links.hostilityLevel) {
                             case 0:
-                                return "white";
+                                return "green";
                             case 1:
-                                return "yellow";
+                                return "white";
                             case 2:
-                                return "#orange";
+                                return "orange";
                             case 3:
                                 return "red";
                             default:
                                 return "black"
                         }
                     }, // link stroke color, scale based on hostility level (from 0 to 3)
-                    linkStrokeOpacity = 0.6, // link stroke opacity
-                    linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
+                    linkStrokeOpacity = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 0.85 : 0.4, // link stroke opacity
+                    linkStrokeWidth = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 8 : 3, // given d in links, returns a stroke width in pixels
                     linkStrokeLinecap = "round", // link stroke linecap
                     linkStrength,
+                    linkChapter = ({ chapter }) => chapter,
                     colors = d3.schemeTableau10, // an array of color strings, for the node groups
-                    width = 640, // outer width, in pixels
-                    height = 400, // outer height, in pixels
                     invalidation, // when this promise resolves, stop the simulation
                     familySource = ({ source }) => source,
                     familyTarget = ({ target }) => target,
@@ -317,22 +382,56 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                     // Compute values.
                     const N = d3.map(nodes, nodeId).map(intern);
+                    const NLabel = d3.map(nodes, nodeLabel).map(intern);
+                    const NGender = d3.map(nodes, nodeGender).map(intern);
+                    const NC = d3.map(nodes, nodeChapter).map(intern);
                     const LS = d3.map(links, linkSource).map(intern);
                     const LT = d3.map(links, linkTarget).map(intern);
                     const LD = d3.map(links, linkDistance).map(intern);
+                    const LC = d3.map(links, linkChapter).map(intern);
                     if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
                     const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
                     const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
-                    const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
+                    const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, l => linkStrokeWidth(l));
+
                     const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
                     const FD = d3.map(family, familyDistance).map(intern);
                     const FS = d3.map(family, familySource).map(intern);
                     const FT = d3.map(family, familyTarget).map(intern);
 
                     // Replace the input nodes and links with mutable objects for the simulation.
-                    nodes = d3.map(nodes, (_, i) => ({ id: N[i] }));
-                    links = d3.map(links, (_, i) => ({ source: LS[i], target: LT[i] }));
-                    familyLinks = d3.map(family, (_, i) => ({ source: FS[i], target: FT[i] }));
+
+                    nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
+                    linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i]]));
+                    familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
+
+                    nodesInChapter = selectNodesInChapter(nodesInChapter);
+                    linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
+                    familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
+                    familyLinkInChapter = sortLinks(familyLinkInChapter);
+
+                    linksInChapter.sort(function (a, b) {
+                        aSource = parseInt(a.source);
+                        bSource = parseInt(b.source);
+                        aTarget = parseInt(a.target);
+                        bTarget = parseInt(b.target);
+                        if (aSource > bSource) { return 1; }
+                        else if (aSource < bSource) { return -1; }
+                        else {
+                            if (aTarget > bTarget) { return 1; }
+                            if (aTarget < bTarget) { return -1; }
+                            else { return 0; }
+                        }
+                    });
+                    //any links with duplicate source and target get an incremented 'linknum'
+                    for (var i = 0; i < linksInChapter.length; i++) {
+                        if (i != 0 && linksInChapter[i].source == linksInChapter[i - 1].source && linksInChapter[i].target == linksInChapter[i - 1].target) {
+                            linksInChapter[i].linknum = linksInChapter[i - 1].linknum + 1;
+                        }
+                        else { linksInChapter[i].linknum = 1; };
+                    };
+
+
 
                     // Compute default domains.
                     if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
@@ -342,49 +441,90 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                     // Construct the forces.
                     const forceNode = d3.forceManyBody();
-                    const forceLink = d3.forceLink(links).id(({ index: i }) => N[i]);
-                    const forceFamilyLink = d3.forceLink(familyLinks).id(({ index: i }) => N[i]).distance(({ index: i }) => FD[i]).strength(0.1);
+                    const forceLink = d3.forceLink(linksInChapter).id(({ index: i }) => nodesInChapter[i].id);
+                    const forceFamilyLink = d3.forceLink(familyLinkInChapter).id(({ index: i }) => nodesInChapter[i].id).distance(5).strength(0.05);
                     if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
                     if (linkStrength !== undefined) {
                         forceLink.strength(linkStrength);
                         forceFamilyLink.strength(linkStrength);
                     }
 
-                    const simulation = d3.forceSimulation(nodes)
+                    const simulation = d3.forceSimulation(nodesInChapter)
                         .force("link", forceLink)
                         .force("link", forceFamilyLink)
                         .force("charge", forceNode)
-                        .force("center", d3.forceCenter())
+                        .force("center", d3.forceCenter(xCenter, yCenter))
                         .on("tick", ticked);
 
                     svg
-                        .attr("viewBox", [-width / 2, -height / 2, width, height])
+                        // .attr("viewBox", [-width / 2, -height / 2, width, height])
                         .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
                     const link = svg.append("g")
+                        .attr("class", "links")
                         .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
-                        .attr("stroke-opacity", linkStrokeOpacity)
-                        .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
+                        .attr("fill", "transparent")
                         .attr("stroke-linecap", linkStrokeLinecap)
-                        .selectAll("line")
-                        .data(links)
-                        .join("line");
+                        .selectAll("path")
+                        .data(linksInChapter)
+                        .join("path")
+                        .attr("stroke-width", link => linkStrokeWidth(link))
+                        .attr("stroke-opacity", link => linkStrokeOpacity(link));
 
                     const node = svg.append("g")
+                        .attr("class", "nodes")
                         .attr("fill", nodeFill)
                         .attr("stroke", nodeStroke)
                         .attr("stroke-opacity", nodeStrokeOpacity)
                         .attr("stroke-width", nodeStrokeWidth)
                         .selectAll("circle")
-                        .data(nodes)
+                        .data(nodesInChapter)
                         .join("circle")
-                        .attr("r", nodeRadius);
+                        .attr("r", nodeRadius)
+                        .on("click", d => {
+                            var svgNodeInfo = d3.select("#graph")
+                                .append("svg")
+                                .attr("id", "svgNodeInfo")
+                                .attr("width", 1000)
+                                .attr("height", 250)
+                                .attr("y", 350);
+                            svgNodeInfo.append("rect")
+                                .attr("id", "nodeInfo")
+                                .attr("x", "7%")
+                                .attr("width", 400)
+                                .attr("height", 300)
+                                .style("fill", "gray");
+                            svgNodeInfo.append("text")
+                                .text("Name: " + d.srcElement.__data__.label)
+                                .attr("x", "8%")
+                                .attr("y", "10%")
+                                .style("font-size", "20px");
+                            svgNodeInfo.append("text")
+                                .text("ID: " + d.srcElement.__data__.id)
+                                .attr("x", "8%")
+                                .attr("y", "20%")
+                                .style("font-size", "20px");
+                            svgNodeInfo.append("text")
+                                .text("Gender: " + d.srcElement.__data__.gender)
+                                .attr("x", "8%")
+                                .attr("y", "30%")
+                                .style("font-size", "20px")
+                            svgNodeInfo.append("text")
+                                .text("First appearance: " + d.srcElement.__data__.chapter + " chapter")
+                                .attr("x", "8%")
+                                .attr("y", "40%")
+                                .style("font-size", "20px")
+                            svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
+                        })
+0
 
-                    setWidthScaleDomainAndRange(nodes);
-                    setHeightScaleDomainAndRange(nodes);
-                    console.log(svgHeightScale(10));
+                    svg.call(d3.zoom()
+                        .scaleExtent([1 / 2, 8])
+                        .on("zoom", zoomGraph));
 
-                    if (W) link.attr("stroke-width", ({ index: i }) => W[i]);
+                    setWidthScaleDomainAndRange(nodesInChapter);
+                    setHeightScaleDomainAndRange(nodesInChapter);
+
                     if (L) link.attr("stroke", ({ index: i }) => L[i]);
                     if (G) node.attr("fill", ({ index: i }) => color(G[i]));
                     if (T) node.append("title").text(({ index: i }) => T[i]);
@@ -396,18 +536,30 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                     function ticked() {
                         link
-                            .attr("x1", d => (d.source.x))
-                            .attr("y1", d => (d.source.y))
-                            .attr("x2", d => (d.target.x))
-                            .attr("y2", d => (d.target.y))
+                            .attr("d", function (d) {
+                                var dx = d.target.x - d.source.x,
+                                    dy = d.target.y - d.source.y,
+                                    dr = 1000 / d.linknum;  //linknum is defined above
+                                return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+                            })
                             .attr("hostilityLevel", function (d) {
-
                                 return d.hostilityLevel;
                             });
 
                         node
                             .attr("cx", d => (d.x))
                             .attr("cy", d => (d.y));
+                    }
+
+                    function zoomGraph(event) {
+                        node.attr("transform", event.transform);
+                        link.attr("transform", event.transform);
+                    }
+
+                    function displayNames(d) {
+                        console.log(d);
+
+                        svg.append("rect").attr("x", "5.7%").attr("y", 300).attr("width", 400).attr("height", 200).style("fill", "white")
                     }
 
                     return Object.assign(svg.node(), { scales: { color } });
@@ -423,16 +575,16 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                 var family = result[2];
 
 
+
                 chart = ForceGraph({ nodes, links, family }, {
                     nodeId: d => d.id,
                     nodeGroup: d => d.group,
                     nodeTitle: d => `${d.id}\n${d.group}`,
-                    linkStrokeWidth: l => Math.sqrt(l.value),
                     width,
-                    height: 600,
+                    height,
                 });
 
-                document.body.addEventListener("change", getChapterNumber);
+                document.body.addEventListener("change", updateGraph);
             });
         });
     });
