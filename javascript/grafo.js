@@ -274,7 +274,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                     for (i in nodesInChapter) {
                         var nodeChapter = nodesInChapter[i][1];
                         if (nodeChapter == null || nodeChapter <= chapterNumber) {
-                            temp.push({ id: nodesInChapter[i][0] });
+                            temp.push({ id: nodesInChapter[i][0], chapter: nodesInChapter[i][1], label: nodesInChapter[i][2], gender: nodesInChapter[i][3]});
                         }
                     }
                     return temp;
@@ -337,6 +337,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                 function ForceGraph({ nodes, links, family }, {
                     nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
+                    nodeLabel = d => d.label,
+                    nodeGender = d => d.gender,
                     nodeGroup, // given d in nodes, returns an (ordinal) value for color
                     nodeGroups, // an array of ordinal values representing the node groups
                     nodeTitle, // given d in nodes, a title string
@@ -380,6 +382,8 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                     // Compute values.
                     const N = d3.map(nodes, nodeId).map(intern);
+                    const NLabel = d3.map(nodes, nodeLabel).map(intern);
+                    const NGender = d3.map(nodes, nodeGender).map(intern);
                     const NC = d3.map(nodes, nodeChapter).map(intern);
                     const LS = d3.map(links, linkSource).map(intern);
                     const LT = d3.map(links, linkTarget).map(intern);
@@ -397,7 +401,7 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
 
                     // Replace the input nodes and links with mutable objects for the simulation.
 
-                    nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i]]));
+                    nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
                     linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i]]));
                     familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
@@ -477,18 +481,40 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         .data(nodesInChapter)
                         .join("circle")
                         .attr("r", nodeRadius)
-                        .on("click", function () {
-                            svg.append("rect")
+                        .on("click", d => {
+                            var svgNodeInfo = d3.select("#graph")
+                                .append("svg")
+                                .attr("id", "svgNodeInfo")
+                                .attr("width", 1000)
+                                .attr("height", 250)
+                                .attr("y", 350);
+                            svgNodeInfo.append("rect")
                                 .attr("id", "nodeInfo")
-                                .attr("x", "3%")
-                                .attr("y", 300)
+                                .attr("x", "7%")
                                 .attr("width", 400)
-                                .attr("height", 200)
-                                .style("fill", "gray")
-                                .append("button")
-                                .attr("id", "closeInfo")
-                                .attr("class", "close")
-                                .value("text", "ciao");
+                                .attr("height", 300)
+                                .style("fill", "gray");
+                            svgNodeInfo.append("text")
+                                .text("Name: " + d.srcElement.__data__.label)
+                                .attr("x", "8%")
+                                .attr("y", "10%")
+                                .style("font-size", "20px");
+                            svgNodeInfo.append("text")
+                                .text("ID: " + d.srcElement.__data__.id)
+                                .attr("x", "8%")
+                                .attr("y", "20%")
+                                .style("font-size", "20px");
+                            svgNodeInfo.append("text")
+                                .text("Gender: " + d.srcElement.__data__.gender)
+                                .attr("x", "8%")
+                                .attr("y", "30%")
+                                .style("font-size", "20px")
+                            svgNodeInfo.append("text")
+                                .text("First appearance: " + d.srcElement.__data__.chapter + " chapter")
+                                .attr("x", "8%")
+                                .attr("y", "40%")
+                                .style("font-size", "20px")
+                            svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
                         })
 0
 

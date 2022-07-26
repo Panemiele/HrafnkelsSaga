@@ -127,16 +127,14 @@ input[type=range]::-webkit-slider-thumb {
 
 #nodeInfo{
   fill: orange;
-  -webkit-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
-  -moz-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
-  -ms-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
-  -o-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+}
+
+#textNodeInfo{
+  color: red;
 }
 
 #my_dataviz{
   background: gray;
-  box-shadow: 0 0 0 1600px rgba(0,0,0,0.65);
 }
 
 #divForInput{
