@@ -500,8 +500,36 @@ function init() {
                             .attr("stroke-width", link => linkStrokeWidth(link))
                             .attr("stroke-opacity", link => linkStrokeOpacity(link))
                             .on("mouseover", d => {
-                                var azione = d.srcElement.__data__.action
-                                //console.log(azione)
+                                var azione = d.srcElement.__data__.action;
+                                var source = d.srcElement.__data__.source;
+                                var target = d.srcElement.__data__.target;
+                                if (!d.isFamily) {
+                                    var svgLinkInfo = d3.select("#graph")
+                                        .append("svg")
+                                        .attr("id", "svgNodeInfo")
+                                        .attr("width", 1000)
+                                        .attr("height", 250)
+                                        .attr("y", 350);
+                                    svgLinkInfo.append("rect")
+                                        .attr("class", "info")
+                                        .attr("id", "nodeInfo")
+                                        .attr("x", "57%")
+                                        .attr("width", 400)
+                                        .attr("height", 300)
+                                        .style("fill", "transparent");
+                                    svgLinkInfo.append("text")
+                                        .attr("class", "info")
+                                        .text(source.label + " " + azione + " " + target.label)
+                                        .attr("x", "58%")
+                                        .attr("y", "10%")
+                                        .style("font-size", "20px");
+                                    // d3.select(this).remove();
+                                    // .link.append("text")
+                                    // .text("Ao");
+                                    // console.log(azione);
+                                    // console.log(source);
+                                    // console.log(target);
+                                }
                             });
 
 
