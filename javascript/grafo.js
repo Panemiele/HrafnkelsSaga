@@ -477,12 +477,20 @@ d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
                         .data(nodesInChapter)
                         .join("circle")
                         .attr("r", nodeRadius)
-                        .on("click", function (d) {
-                            console.log(d3.select(this).attr("id"));
-
-                            svg.append("rect").attr("x", "5.7%").attr("y", 300).attr("width", 400).attr("height", 200).style("fill", "white")
-                        });
-
+                        .on("click", function () {
+                            svg.append("rect")
+                                .attr("id", "nodeInfo")
+                                .attr("x", "3%")
+                                .attr("y", 300)
+                                .attr("width", 400)
+                                .attr("height", 200)
+                                .style("fill", "gray")
+                                .append("button")
+                                .attr("id", "closeInfo")
+                                .attr("class", "close")
+                                .value("text", "ciao");
+                        })
+0
 
                     svg.call(d3.zoom()
                         .scaleExtent([1 / 2, 8])

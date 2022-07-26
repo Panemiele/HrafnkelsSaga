@@ -124,6 +124,31 @@ input[type=range]::-webkit-slider-thumb {
   background: rgb(0, 0, 0);
   box-shadow: 0px 2px 10px -2px black(1);
 }
+
+#nodeInfo{
+  fill: orange;
+  -webkit-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+  -moz-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+  -ms-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+  -o-filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+}
+
+#my_dataviz{
+  background: gray;
+  box-shadow: 0 0 0 1600px rgba(0,0,0,0.65);
+}
+
+#divForInput{
+  padding-bottom: 50px;
+}
+
+#graphDiv{
+  -webkit-box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
+  -moz-box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
+  box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
+}
+
 input[type=range]::-moz-range-thumb {
   -webkit-appearance: none;
   height: 40px;
