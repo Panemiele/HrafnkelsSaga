@@ -308,7 +308,7 @@ function init() {
                             chapter = linksInChapter[i][2];
 
                             if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3] });
+                                temp.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily:  linksInChapter[i][5]});
                             }
                         }
                         for (i in linksInChapter) {
@@ -375,10 +375,10 @@ function init() {
                         linkSource = ({ source }) => source, // given d in links, returns a node identifier string
                         linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
                         linkDistance = ({ distance }) => distance,
-                        linkStroke = function (links) {
+                        /*linkStroke = function (links) {
                             if (links.isFamily == 1)
                                 return "transparent";
-                            switch (links.hostilityLevel) {
+                           switch (links.hostilityLevel) {
                                 case 0:
                                     return "green";
                                 case 1:
@@ -390,13 +390,15 @@ function init() {
                                 default:
                                     return "black"
                             }
-                        }, // link stroke color, scale based on hostility level (from 0 to 3)
+                        },*/ // link stroke color, scale based on hostility level (from 0 to 3)
                         linkStrokeOpacity = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 0.85 : 0.4, // link stroke opacity
                         linkStrokeWidth = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 8 : 3, // given d in links, returns a stroke width in pixels
                         linkStrokeLinecap = "round", // link stroke linecap
                         linkStrength,
                         linkChapter = ({ chapter }) => chapter,
 
+                        linkIsFamily = ({ isFamily }) => isFamily,
+                        linkHostilityLevel = ({ hostilityLevel }) => hostilityLevel,
                         linkAction = ({ action }) => action,
 
                         colors = d3.schemeTableau10, // an array of color strings, for the node groups
@@ -412,6 +414,8 @@ function init() {
                         const NGender = d3.map(nodes, nodeGender).map(intern);
                         const NC = d3.map(nodes, nodeChapter).map(intern);
 
+                        const LF = d3.map(links, linkIsFamily).map(intern);
+                        const LH = d3.map(links, linkHostilityLevel).map(intern);
                         const LA = d3.map(links, linkAction).map(intern);
 
                         const LS = d3.map(links, linkSource).map(intern);
@@ -423,7 +427,7 @@ function init() {
                         const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
                         const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, l => linkStrokeWidth(l));
 
-                        const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
+                        //const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
                         const FD = d3.map(family, familyDistance).map(intern);
                         const FS = d3.map(family, familySource).map(intern);
                         const FT = d3.map(family, familyTarget).map(intern);
@@ -431,7 +435,7 @@ function init() {
                         // Replace the input nodes and links with mutable objects for the simulation.
 
                         nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
-                        linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i]]));
+                        linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i]]));
                         familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
                         nodesInChapter = selectNodesInChapter(nodesInChapter);
@@ -455,7 +459,7 @@ function init() {
                         //any links with duplicate source and target get an incremented 'linknum'
                         for (var i = 0; i < linksInChapter.length; i++) {
                             if (i != 0 && linksInChapter[i].source == linksInChapter[i - 1].source && linksInChapter[i].target == linksInChapter[i - 1].target) {
-                                linksInChapter[i].linknum = linksInChapter[i - 1].linknum + 1;
+                                linksInChapter[i].linknum = linksInChapter[i - 1].linknum + 3;
                             }
                             else { linksInChapter[i].linknum = 1; };
                         };
@@ -491,46 +495,63 @@ function init() {
 
                         const link = svg.append("g")
                             .attr("class", "links")
-                            .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
+                          //  .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
                             .attr("fill", "transparent")
                             .attr("stroke-linecap", linkStrokeLinecap)
                             .selectAll("path")
                             .data(linksInChapter)
                             .join("path")
+                            .attr("stroke", function(d){
+                                                if(d.isFamily==1)
+                                                  return "transparent"
+                                                if (d.hostilityLevel==0)
+                                                  return "green"
+                                                if (d.hostilityLevel==1)
+                                                  return "white"
+                                                if (d.hostilityLevel==2)
+                                                  return "orange"
+                                                if (d.hostilityLevel==3)
+                                                  return "red"
+                                              })
                             .attr("stroke-width", link => linkStrokeWidth(link))
                             .attr("stroke-opacity", link => linkStrokeOpacity(link))
-                            .on("mouseover", d => {
+                            .on("mouseover", function (d){
+                                console.log(d)
                                 var azione = d.srcElement.__data__.action;
                                 var source = d.srcElement.__data__.source;
                                 var target = d.srcElement.__data__.target;
-                                if (!d.isFamily) {
+                                var isFamily = d.srcElement.__data__.isFamily;
+                                if (!isFamily) {
                                     var svgLinkInfo = d3.select("#graph")
                                         .append("svg")
                                         .attr("id", "svgNodeInfo")
                                         .attr("width", 1000)
                                         .attr("height", 250)
                                         .attr("y", 350);
-                                    svgLinkInfo.append("rect")
+                                    /*svgLinkInfo.append("rect")
                                         .attr("class", "info")
-                                        .attr("id", "nodeInfo")
+                                        .attr("id", "edgeAction")
                                         .attr("x", "57%")
                                         .attr("width", 400)
                                         .attr("height", 300)
-                                        .style("fill", "transparent");
+                                        .style("fill", "blue");*/
                                     svgLinkInfo.append("text")
-                                        .attr("class", "info")
+                                        .attr("class", "edgeAction")
                                         .text(source.label + " " + azione + " " + target.label)
                                         .attr("x", "58%")
                                         .attr("y", "10%")
-                                        .style("font-size", "20px");
+                                        .style("font-size", "20px")}})
+                              .on("mouseleave", d => {
+                                    console.log("ciao")
+                                    svg.selectAll(".edgeAction").remove();
+                              });
                                     // d3.select(this).remove();
                                     // .link.append("text")
                                     // .text("Ao");
                                     // console.log(azione);
                                     // console.log(source);
                                     // console.log(target);
-                                }
-                            });
+
 
 
                         const node = svg.append("g")
@@ -635,7 +656,7 @@ function init() {
                         setWidthScaleDomainAndRange(nodesInChapter);
                         setHeightScaleDomainAndRange(nodesInChapter);
 
-                        if (L) link.attr("stroke", ({ index: i }) => L[i]);
+                        //if (L) link.attr("stroke", ({ index: i }) => L[i]);
                         if (G) node.attr("fill", ({ index: i }) => color(G[i]));
                         if (T) node.append("title").text(({ index: i }) => T[i]);
                         if (invalidation != null) invalidation.then(() => simulation.stop());
