@@ -521,13 +521,21 @@ function init() {
                                 var target = d.srcElement.__data__.target;
                                 var isFamily = d.srcElement.__data__.isFamily;
                                 if (!isFamily) {
-                                    d3.select("#graph")
-                                        .append("text")
+                                    var edgeInfo = d3.select("#graph");
+                                    edgeInfo.append("rect")
+                                        .attr("class", "edgeAction")
+                                        .attr("id", "nodeInfo")
+                                        .attr("x", "56%")
+                                        .attr("y", "7%")
+                                        .attr("width", 350)
+                                        .attr("height", 40)
+                                        .style("fill", "gray");
+                                    edgeInfo.append("text")
                                         .attr("class", "edgeAction")
                                         .text(source.label + " " + azione + " " + target.label)
                                         .attr("x", "58%")
                                         .attr("y", "10%")
-                                        .style("font-size", "20px")
+                                        .style("font-size", "20px");
                                 }
                             })
                             .on("mouseleave", d => {
