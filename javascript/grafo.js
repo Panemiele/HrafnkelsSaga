@@ -25,10 +25,10 @@ function reset() {
 }
 
 function init() {
-    d3.json('/dataset/characters_nodes.json').then(function (nodesData) {
-        d3.json('/dataset/characters_edges.json').then(function (edgesData) {
-            d3.json('/dataset/actions.json').then(function (actionsData) {
-                d3.json('/dataset/gender_codes.json').then(function (gendersData) {
+    d3.json('./dataset/characters_nodes.json').then(function (nodesData) {
+        d3.json('./dataset/characters_edges.json').then(function (edgesData) {
+            d3.json('./dataset/actions.json').then(function (actionsData) {
+                d3.json('./dataset/gender_codes.json').then(function (gendersData) {
 
                     //--------------------------------------------------------------------------------------------
                     // FUNCTIONS DEFINITIONS
