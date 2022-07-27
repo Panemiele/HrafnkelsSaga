@@ -197,44 +197,44 @@ function init() {
                     }
 
 
-                    /**
-                     * @param {characterId} the unique identifier for a character
-                     * @returns a new Array filled with all the nodes near to the given one
-                     */
-                    function getLinkedNodes(characterId) {
-                        var linkedNodesIds = [];
-                        edgesData.forEach(e => {
-                            if (e.source == characterId) {
-                                linkedNodesIds.push(e.target);
-                            }
-                        })
-                        return linkedNodesIds;
-                    }
+                    // /**
+                    //  * @param {characterId} the unique identifier for a character
+                    //  * @returns a new Array filled with all the nodes near to the given one
+                    //  */
+                    // function getLinkedNodes(characterId) {
+                    //     var linkedNodesIds = [];
+                    //     edgesData.forEach(e => {
+                    //         if (e.source == characterId) {
+                    //             linkedNodesIds.push(e.target);
+                    //         }
+                    //     })
+                    //     return linkedNodesIds;
+                    // }
 
 
-                    /**
-                     * @param {characterId} the unique identifier for a character
-                     * @param {nodes} the Array of nodes
-                     * @returns all the character's informations
-                     */
-                    function getCharacterById(characterId, nodes) {
-                        return find(nodes, characterId);
-                    }
+                    // /**
+                    //  * @param {characterId} the unique identifier for a character
+                    //  * @param {nodes} the Array of nodes
+                    //  * @returns all the character's informations
+                    //  */
+                    // function getCharacterById(characterId, nodes) {
+                    //     return find(nodes, characterId);
+                    // }
 
 
-                    /**
-                     * This function changes the color of a particular given node
-                     * @param {node} the unique identifier for a node
-                     * @param {color} a string related to a color (in RGB)
-                     */
-                    function updateNodesColor(node, color) {
-                        for (var i = 0; i < nodesData.length; i++) {
-                            var tmp = nodesData[i];
-                            if (tmp.id == node) {
-                                tmp.color = color;
-                            }
-                        }
-                    }
+                    // /**
+                    //  * This function changes the color of a particular given node
+                    //  * @param {node} the unique identifier for a node
+                    //  * @param {color} a string related to a color (in RGB)
+                    //  */
+                    // function updateNodesColor(node, color) {
+                    //     for (var i = 0; i < nodesData.length; i++) {
+                    //         var tmp = nodesData[i];
+                    //         if (tmp.id == node) {
+                    //             tmp.color = color;
+                    //         }
+                    //     }
+                    // }
 
 
                     /**
@@ -243,11 +243,10 @@ function init() {
                      * @param {circles} the list of circles
                      */
                     function setWidthScaleDomainAndRange(circles) {
-                        maxCoordX = d3.max(circles, function (d) { //console.log("d.x: " + d.x);
+                        maxCoordX = d3.max(circles, function (d) {
                             return d.x
                         });
                         minCoordX = d3.min(circles, function (d) { return d.x });
-                        //console.log("ciao " + minCoordX + " - " + maxCoordX);
                         svgWidthScale.domain([minCoordX, maxCoordX]);
                         svgWidthScale.range([-370, 370]);
                     }
@@ -316,11 +315,11 @@ function init() {
                             target = linksInChapter[i][1];
                             chapter = linksInChapter[i][2];
 
-                            if (linksInChapter[i][2] = chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp2.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3] });
+                            if (linksInChapter[i][2] == chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
+                                temp2.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily: linksInChapter[i][5] });
                             }
                         }
-                        console.log(temp);
+                        console.log(temp2);
                         return temp;
                     }
 
@@ -391,7 +390,7 @@ function init() {
                             }
                         },*/ // link stroke color, scale based on hostility level (from 0 to 3)
                         linkStrokeOpacity = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 0.85 : 0.4, // link stroke opacity
-                        linkStrokeWidth = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 8 : 3, // given d in links, returns a stroke width in pixels
+                        // linkStrokeWidth = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 8 : 3, // given d in links, returns a stroke width in pixels
                         linkStrokeLinecap = "round", // link stroke linecap
                         linkStrength,
                         linkChapter = ({ chapter }) => chapter,
@@ -501,8 +500,11 @@ function init() {
                             .data(linksInChapter)
                             .join("path")
                             .attr("stroke", function (d) {
+
                                 if (d.isFamily == 1)
                                     return "transparent"
+                                if (d.chapter < chapterNumber)
+                                    return "gray"
                                 if (d.hostilityLevel == 0)
                                     return "green"
                                 if (d.hostilityLevel == 1)
@@ -512,30 +514,43 @@ function init() {
                                 if (d.hostilityLevel == 3)
                                     return "red"
                             })
-                            .attr("stroke-width", link => linkStrokeWidth(link))
-                            .attr("stroke-opacity", link => linkStrokeOpacity(link))
+                            // .attr("stroke-width", link => linkStrokeWidth(link))
+                            .attr("stroke-width", function (d) {
+                                // console.log(d.chapter + " " + parseInt(d.chapter) + " " + typeof(d.chapter));
+                                if (parseInt(d.chapter) == chapterNumber)
+                                    return 8;
+                                else return 3;
+                            })
+                            .attr("stroke-opacity", function (d) {
+                                // console.log(d.chapter + " " + parseInt(d.chapter) + " " + typeof(d.chapter));
+                                if (parseInt(d.chapter) == chapterNumber)
+                                    return 0.84;
+                                else return 0.4;
+                            })
                             .on("mouseover", function (d) {
-                                console.log(d)
-                                var azione = d.srcElement.__data__.action;
-                                var source = d.srcElement.__data__.source;
-                                var target = d.srcElement.__data__.target;
-                                var isFamily = d.srcElement.__data__.isFamily;
-                                if (!isFamily) {
-                                    var edgeInfo = d3.select("#graph");
-                                    edgeInfo.append("rect")
-                                        .attr("class", "edgeAction")
-                                        .attr("id", "nodeInfo")
-                                        .attr("x", "56%")
-                                        .attr("y", "7%")
-                                        .attr("width", 350)
-                                        .attr("height", 40)
-                                        .style("fill", "gray");
-                                    edgeInfo.append("text")
-                                        .attr("class", "edgeAction")
-                                        .text(source.label + " " + azione + " " + target.label)
-                                        .attr("x", "58%")
-                                        .attr("y", "10%")
-                                        .style("font-size", "20px");
+                                if (d.srcElement.__data__.chapter == chapterNumber) {
+                                    console.log(d)
+                                    var azione = d.srcElement.__data__.action;
+                                    var source = d.srcElement.__data__.source;
+                                    var target = d.srcElement.__data__.target;
+                                    var isFamily = d.srcElement.__data__.isFamily;
+                                    if (!isFamily) {
+                                        var edgeInfo = d3.select("#graph");
+                                        edgeInfo.append("rect")
+                                            .attr("class", "edgeAction")
+                                            .attr("id", "nodeInfo")
+                                            .attr("x", "56%")
+                                            .attr("y", "7%")
+                                            .attr("width", 350)
+                                            .attr("height", 40)
+                                            .style("fill", "gray");
+                                        edgeInfo.append("text")
+                                            .attr("class", "edgeAction")
+                                            .text(source.label + " " + azione + " " + target.label)
+                                            .attr("x", "58%")
+                                            .attr("y", "10%")
+                                            .style("font-size", "20px");
+                                    }
                                 }
                             })
                             .on("mouseleave", d => {
