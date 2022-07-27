@@ -649,41 +649,65 @@ function init() {
                         options.append("rect")
                             .attr("class", "options")
                             .attr("id", "options")
-                            .attr("x", "85%")
+                            .attr("x", "75%")
                             .attr("y", "7%")
-                            .attr("width", 250)
-                            .attr("height", 170)
+                            .attr("width", 350)
+                            .attr("height", 250)
                             .style("fill", "gray");
                         options.append("text")
                             .attr("class", "optionsText")
-                            .text("Options:")
-                            .attr("x", "85.5%")
+                            .text("How to interact with graph:")
+                            .attr("x", "76%")
                             .attr("y", "12%")
-                            .style("font-size", "20px");
+                            .style("font-size", "25px");
                         options.append("text")
                             .attr("class", "optionsText")
                             .text("Click a node to show cahracter")
-                            .attr("x", "86%")
+                            .attr("x", "76%")
                             .attr("y", "16%")
-                            .style("font-size", "15px");
+                            .style("font-size", "20px");
                         options.append("text")
                             .attr("class", "optionsText")
-                            .text("informations")
-                            .attr("x", "86%")
+                            .text("informations.")
+                            .attr("x", "76%")
                             .attr("y", "18%")
-                            .style("font-size", "15px");
+                            .style("font-size", "20px");
                         options.append("text")
                             .attr("class", "optionsText")
                             .text("Hover with mouse on a link")
-                            .attr("x", "86%")
+                            .attr("x", "76%")
                             .attr("y", "21%")
-                            .style("font-size", "15px");
+                            .style("font-size", "20px");
                         options.append("text")
                             .attr("class", "optionsText")
-                            .text("to show link informations")
-                            .attr("x", "86%")
+                            .text("to show link informations.")
+                            .attr("x", "76%")
                             .attr("y", "23%")
-                            .style("font-size", "15px");
+                            .style("font-size", "20px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("Scroll with mouse over the graph")
+                            .attr("x", "76%")
+                            .attr("y", "26%")
+                            .style("font-size", "20px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("to zoom it")
+                            .attr("x", "76%")
+                            .attr("y", "28%")
+                            .style("font-size", "20px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("Drag the graph and move it")
+                            .attr("x", "76%")
+                            .attr("y", "31%")
+                            .style("font-size", "20px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("along the screen")
+                            .attr("x", "76%")
+                            .attr("y", "33%")
+                            .style("font-size", "20px");
 
 
                         svg.call(d3.zoom()
