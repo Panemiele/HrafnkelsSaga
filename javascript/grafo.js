@@ -19,10 +19,9 @@ var svg = d3.selectAll("#graph")
 
 function reset() {
     svg.selectAll(".info").remove();
-    svg.selectAll(".nodes").remove();
-    svg.selectAll(".links").remove()
+    svg.selectAll("#svgNodeInfo").remove();
     d3.select(this).remove();
-    init();
+    svg.style("box-shadow", "0 0 0 0px rgba(0,0,0,0.65)");
 }
 
 function init() {
@@ -522,20 +521,8 @@ function init() {
                                 var target = d.srcElement.__data__.target;
                                 var isFamily = d.srcElement.__data__.isFamily;
                                 if (!isFamily) {
-                                    var svgLinkInfo = d3.select("#graph")
-                                        .append("svg")
-                                        .attr("id", "svgNodeInfo")
-                                        .attr("width", 1000)
-                                        .attr("height", 250)
-                                        .attr("y", 350);
-                                    /*svgLinkInfo.append("rect")
-                                        .attr("class", "info")
-                                        .attr("id", "edgeAction")
-                                        .attr("x", "57%")
-                                        .attr("width", 400)
-                                        .attr("height", 300)
-                                        .style("fill", "blue");*/
-                                    svgLinkInfo.append("text")
+                                    d3.select("#graph")
+                                        .append("text")
                                         .attr("class", "edgeAction")
                                         .text(source.label + " " + azione + " " + target.label)
                                         .attr("x", "58%")
@@ -565,6 +552,7 @@ function init() {
                             .join("circle")
                             .attr("r", nodeRadius)
                             .on("click", d => {
+                                reset();
                                 var svgNodeInfo = d3.select("#graph")
                                     .append("svg")
                                     .attr("id", "svgNodeInfo")
@@ -626,23 +614,7 @@ function init() {
                                     .text("Reset")
                                     .attr("x", "32%")
                                     .attr("y", "70%")
-                                    .style("font-size", "20px")
-
-                                /*  var fo = svgNodeInfo.append('foreignObject')
-                                        .attr({
-                                        'x': 20, //anchor.w - tip.w,
-                                        'y': 20, //anchor.h + tip.h,
-                                        'width': 220,//foWidth,
-                                        'class': 'svg-tooltip'
-                                        });
-                                    var div = fo.append('div')
-                                        .attr({
-                                         'class': 'tooltip'
-                                          });
-                                    div.append('div')
-                                        .attr('class', 'lead')
-                                        .html('<button onclick="reset()">Click Me</button>' );
-                                        //.attr("onclick", "reset()");*/
+                                    .style("font-size", "20px");
 
 
                                 svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
