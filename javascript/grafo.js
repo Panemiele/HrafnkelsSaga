@@ -457,7 +457,7 @@ function init() {
                         //any links with duplicate source and target get an incremented 'linknum'
                         for (var i = 0; i < linksInChapter.length; i++) {
                             if (i != 0 && linksInChapter[i].source == linksInChapter[i - 1].source && linksInChapter[i].target == linksInChapter[i - 1].target) {
-                                linksInChapter[i].linknum = linksInChapter[i - 1].linknum + 3;
+                                linksInChapter[i].linknum = linksInChapter[i - 1].linknum + 5;
                             }
                             else { linksInChapter[i].linknum = 1; };
                         };
@@ -732,7 +732,7 @@ function init() {
                                     var dx = d.target.x - d.source.x,
                                         dy = d.target.y - d.source.y,
                                         dr = 1000 / d.linknum;  //linknum is defined above
-                                    return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+                                    return "M " + d.source.x + "," + d.source.y + " Q " + d.source.x/2 + " " + d.source.y/2 + ", "/* + d.target.x + " " + d.target.y + ", " */ + d.target.x + " " + d.target.y;
                                 })
                                 .attr("hostilityLevel", function (d) {
                                     return d.hostilityLevel;
