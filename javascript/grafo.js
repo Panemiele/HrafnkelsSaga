@@ -307,7 +307,7 @@ function init() {
                             chapter = linksInChapter[i][2];
 
                             if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily:  linksInChapter[i][5]});
+                                temp.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily: linksInChapter[i][5] });
                             }
                         }
                         for (i in linksInChapter) {
@@ -494,50 +494,60 @@ function init() {
 
                         const link = svg.append("g")
                             .attr("class", "links")
-                          //  .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
+                            //  .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
                             .attr("fill", "transparent")
                             .attr("stroke-linecap", linkStrokeLinecap)
                             .selectAll("path")
                             .data(linksInChapter)
                             .join("path")
-                            .attr("stroke", function(d){
-                                                if(d.isFamily==1)
-                                                  return "transparent"
-                                                if (d.hostilityLevel==0)
-                                                  return "green"
-                                                if (d.hostilityLevel==1)
-                                                  return "white"
-                                                if (d.hostilityLevel==2)
-                                                  return "orange"
-                                                if (d.hostilityLevel==3)
-                                                  return "red"
-                                              })
+                            .attr("stroke", function (d) {
+                                if (d.isFamily == 1)
+                                    return "transparent"
+                                if (d.hostilityLevel == 0)
+                                    return "green"
+                                if (d.hostilityLevel == 1)
+                                    return "white"
+                                if (d.hostilityLevel == 2)
+                                    return "orange"
+                                if (d.hostilityLevel == 3)
+                                    return "red"
+                            })
                             .attr("stroke-width", link => linkStrokeWidth(link))
                             .attr("stroke-opacity", link => linkStrokeOpacity(link))
-                            .on("mouseover", function (d){
+                            .on("mouseover", function (d) {
                                 console.log(d)
                                 var azione = d.srcElement.__data__.action;
                                 var source = d.srcElement.__data__.source;
                                 var target = d.srcElement.__data__.target;
                                 var isFamily = d.srcElement.__data__.isFamily;
                                 if (!isFamily) {
-                                    d3.select("#graph")
-                                        .append("text")
+                                    var edgeInfo = d3.select("#graph");
+                                    edgeInfo.append("rect")
+                                        .attr("class", "edgeAction")
+                                        .attr("id", "nodeInfo")
+                                        .attr("x", "56%")
+                                        .attr("y", "7%")
+                                        .attr("width", 350)
+                                        .attr("height", 40)
+                                        .style("fill", "gray");
+                                    edgeInfo.append("text")
                                         .attr("class", "edgeAction")
                                         .text(source.label + " " + azione + " " + target.label)
                                         .attr("x", "58%")
                                         .attr("y", "10%")
-                                        .style("font-size", "20px")}})
-                              .on("mouseleave", d => {
-                                    console.log("ciao")
-                                    svg.selectAll(".edgeAction").remove();
-                              });
-                                    // d3.select(this).remove();
-                                    // .link.append("text")
-                                    // .text("Ao");
-                                    // console.log(azione);
-                                    // console.log(source);
-                                    // console.log(target);
+                                        .style("font-size", "20px");
+                                }
+                            })
+                            .on("mouseleave", d => {
+                                console.log("ciao")
+                                svg.selectAll(".edgeAction").remove();
+                            });
+                        // d3.select(this).remove();
+                        // .link.append("text")
+                        // .text("Ao");
+                        // console.log(azione);
+                        // console.log(source);
+                        // console.log(target);
 
 
 
@@ -619,6 +629,46 @@ function init() {
 
                                 svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
                             })
+
+                        var options = d3.select("#graph");
+                        options.append("rect")
+                            .attr("class", "options")
+                            .attr("id", "options")
+                            .attr("x", "85%")
+                            .attr("y", "7%")
+                            .attr("width", 250)
+                            .attr("height", 170)
+                            .style("fill", "gray");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("Options:")
+                            .attr("x", "85.5%")
+                            .attr("y", "12%")
+                            .style("font-size", "20px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("Click a node to show cahracter")
+                            .attr("x", "86%")
+                            .attr("y", "16%")
+                            .style("font-size", "15px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("informations")
+                            .attr("x", "86%")
+                            .attr("y", "18%")
+                            .style("font-size", "15px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("Hover with mouse on a link")
+                            .attr("x", "86%")
+                            .attr("y", "21%")
+                            .style("font-size", "15px");
+                        options.append("text")
+                            .attr("class", "optionsText")
+                            .text("to show link informations")
+                            .attr("x", "86%")
+                            .attr("y", "23%")
+                            .style("font-size", "15px");
 
 
                         svg.call(d3.zoom()
