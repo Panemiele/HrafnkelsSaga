@@ -541,8 +541,18 @@ function init() {
                                             .attr("id", "nodeInfo")
                                             .attr("x", "56%")
                                             .attr("y", "7%")
-                                            .attr("width", 350)
-                                            .attr("height", 40)
+                                            .attr("width", () => {
+                                                var text = edgeInfo.append("text")
+                                                .attr("class", "edgeAction")
+                                                .attr("id", "edgeActionText")
+                                                .text(source.label + " --> " + azione + " --> " + target.label)
+                                                .attr("x", "57%")
+                                                .attr("y", "10%")
+                                                .style("font-size", "20px");
+                                                var bbox = text.node().getBBox();
+                                                return bbox.width + 40;
+                                            })
+                                            .attr("height", 50)
                                             .style("fill", "gray");
                                         edgeInfo.append("text")
                                             .attr("class", "edgeAction")
@@ -732,7 +742,7 @@ function init() {
                                     var dx = d.target.x - d.source.x,
                                         dy = d.target.y - d.source.y,
                                         dr = 1000 / d.linknum;  //linknum is defined above
-                                    return "M " + d.source.x + "," + d.source.y + " Q " + d.source.x/2 + " " + d.source.y/2 + ", "/* + d.target.x + " " + d.target.y + ", " */ + d.target.x + " " + d.target.y;
+                                    return "M " + d.source.x + "," + d.source.y + " Q " + (d.source.x + d.target.x)/2 + " " + (d.source.y + d.target.y)/2 + ", "/* + d.target.x + " " + d.target.y + ", " */ + d.target.x + " " + d.target.y;
                                 })
                                 .attr("hostilityLevel", function (d) {
                                     return d.hostilityLevel;
