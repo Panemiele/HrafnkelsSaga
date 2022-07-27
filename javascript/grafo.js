@@ -546,7 +546,7 @@ function init() {
                                             .style("fill", "gray");
                                         edgeInfo.append("text")
                                             .attr("class", "edgeAction")
-                                            .text(source.label + " " + azione + " " + target.label)
+                                            .text(source.label + " ---> " + azione + " ---> " + target.label)
                                             .attr("x", "58%")
                                             .attr("y", "10%")
                                             .style("font-size", "20px");
