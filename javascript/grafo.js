@@ -17,13 +17,6 @@ var svg = d3.select("#graph")
     .attr("width", width)
     .attr("height", height);
 
-function reset() {
-    svg.selectAll(".info").remove();
-    svg.selectAll("#svgNodeInfo").remove();
-    d3.select(this).remove();
-    svg.style("box-shadow", "0 0 0 0px rgba(0,0,0,0.65)");
-}
-
 function init() {
     d3.json('./dataset/characters_nodes.json').then(function (nodesData) {
         d3.json('./dataset/characters_edges.json').then(function (edgesData) {
@@ -47,8 +40,97 @@ function init() {
                      */
 
 
+                    function drawGraphUsageGuide(){
+                        var howToInteractWithGraph = d3.select("#graph").append("g").attr("id", "howToInteractWithGraph");
+                        howToInteractWithGraph.append("rect")
+                            .attr("class", "options")
+                            .attr("id", "options")
+                            .attr("x", "75%")
+                            .attr("y", "7%")
+                            .attr("width", "20%")
+                            .attr("height", 550)
+                            .style("fill", "#999");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("How to interact with graph:")
+                            .attr("x", "76%")
+                            .attr("y", "12%")
+                            .style("font-size", "30px")
+                            .style("font-weight", 700);
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Click a node to show character")
+                            .attr("x", "76%")
+                            .attr("y", "16%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("informations.")
+                            .attr("x", "76%")
+                            .attr("y", "18%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Hover with mouse on a link")
+                            .attr("x", "76%")
+                            .attr("y", "22%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("to show link informations.")
+                            .attr("x", "76%")
+                            .attr("y", "24%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Scroll with mouse over the graph")
+                            .attr("x", "76%")
+                            .attr("y", "28%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("to zoom it.")
+                            .attr("x", "76%")
+                            .attr("y", "30%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Drag the graph and move it")
+                            .attr("x", "76%")
+                            .attr("y", "34%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("around the screen.")
+                            .attr("x", "76%")
+                            .attr("y", "36%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Hover with mouse on a node")
+                            .attr("x", "76%")
+                            .attr("y", "40%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("to show all connected nodes.")
+                            .attr("x", "76%")
+                            .attr("y", "42%")
+                            .style("font-size", "20px");
+                    }
+
+
+                    function reset() {
+                        svg.selectAll(".info").remove();
+                        svg.selectAll("#svgNodeInfo").remove();
+                        d3.select(this).remove();
+                        svg.style("box-shadow", "0 0 0 0px rgba(0,0,0,0.65)");
+                        drawGraphUsageGuide();
+                        drawLegend();
+                    }
+
                     function isFamily(actions) {
-                        parental_actions = [];
+                        var parental_actions = [];
 
                         actions.forEach(function (azione) {
                             if (azione["isFamily"] == 1) {
@@ -56,7 +138,7 @@ function init() {
                             }
                         });
 
-                        families = [];
+                        var families = [];
                         edgesData.forEach(function (general_actions) {
                             if (parental_actions.indexOf(general_actions["action"]) != -1) {
 
@@ -68,8 +150,8 @@ function init() {
                                 }
 
                                 else {
-                                    aggiunto = 0;
-                                    for (i in families) {
+                                    var aggiunto = 0;
+                                    for (var i in families) {
                                         if (families[i].indexOf(general_actions["source"]) != -1) {
                                             if (families[i].indexOf(general_actions["target"]) != -1) {
                                                 aggiunto = 1
@@ -103,26 +185,26 @@ function init() {
                     }
 
                     function found_family(families, id_character) {
-                        for (i in families) {
+                        for (var i in families) {
                             if (families[i].indexOf(id_character) != -1) {
                                 return i;
                             }
                         }
 
-                        alone = families.length + parseInt(id_character);
+                        var alone = families.length + parseInt(id_character);
 
                         return alone;
                     }
 
                     function createclique(families) {
-                        edges = [];
-                        for (i in families) {
+                        var edges = [];
+                        for (var i in families) {
 
-                            for (j in families[i]) {
-                                source = families[i][j];
+                            for (var j in families[i]) {
+                                var source = families[i][j];
 
-                                for (h in families[i]) {
-                                    target = families[i][h]
+                                for (var h in families[i]) {
+                                    var target = families[i][h]
                                     if (j < h) {
                                         var edge = {
                                             "source": source,
@@ -139,8 +221,8 @@ function init() {
                     }
 
                     function setDistance(source, target, families) {
-                        source_family = found_family(families, source);
-                        target_family = found_family(families, target);
+                        var source_family = found_family(families, source);
+                        var target_family = found_family(families, target);
                         if (source_family == target_family) {
                             return 1;
                         }
@@ -154,7 +236,7 @@ function init() {
                         var characterEdges = [];
                         var familyEdges = [];
 
-                        families = isFamily(actions);
+                        var families = isFamily(actions);
 
                         nodesData.forEach(function (character) {
                             genderCodes.forEach(function (gender) {
@@ -188,7 +270,7 @@ function init() {
                             })
                         })
 
-                        familyEdges = createclique(families);
+                        var familyEdges = createclique(families);
 
                         result[0] = characterNodes;
                         result[1] = characterEdges;
@@ -240,7 +322,7 @@ function init() {
 
                     function selectNodesInChapter(nodesInChapter) {
                         var temp = []
-                        for (i in nodesInChapter) {
+                        for (var i in nodesInChapter) {
                             var nodeChapter = nodesInChapter[i][1];
                             if (nodeChapter == null || nodeChapter <= chapterNumber) {
                                 temp.push({ id: nodesInChapter[i][0], chapter: nodesInChapter[i][1], label: nodesInChapter[i][2], gender: nodesInChapter[i][3] });
@@ -251,32 +333,24 @@ function init() {
 
                     function selectLinksInChapter(linksInChapter, nodesInChapter) {
                         var temp = [];
-                        var temp2 = [];
                         var nodesIds = [];
 
-                        for (i in nodesInChapter) {
-                            nodesIC = parseInt(nodesInChapter[i].id)
+                        for (var i in nodesInChapter) {
+                            var nodesIC = parseInt(nodesInChapter[i].id)
                             nodesIds.push(nodesIC)
                         }
 
-                        for (i in linksInChapter) {
+                        for (var i in linksInChapter) {
 
-                            source = linksInChapter[i][0];
-                            target = linksInChapter[i][1];
-                            chapter = linksInChapter[i][2];
+                            var source = linksInChapter[i][0];
+                            var target = linksInChapter[i][1];
+                            var chapter = linksInChapter[i][2];
+                            var action = linksInChapter[i][3];
+                            var hostilityLevel = linksInChapter[i][4];
+                            var isFamily = linksInChapter[i][5];
 
                             if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily: linksInChapter[i][5] });
-                            }
-                        }
-                        for (i in linksInChapter) {
-
-                            source = linksInChapter[i][0];
-                            target = linksInChapter[i][1];
-                            chapter = linksInChapter[i][2];
-
-                            if (linksInChapter[i][2] == chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp2.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily: linksInChapter[i][5] });
+                                temp.push({ source: source, target: target, chapter: chapter, action: action, hostilityLevel: hostilityLevel, isFamily: isFamily });
                             }
                         }
                         return temp;
@@ -286,15 +360,15 @@ function init() {
                         var temp = [];
                         var nodesIds = [];
 
-                        for (i in nodesInChapter) {
-                            nodesIC = parseInt(nodesInChapter[i].id)
+                        for (var i in nodesInChapter) {
+                            var nodesIC = parseInt(nodesInChapter[i].id)
                             nodesIds.push(nodesIC)
                         }
 
-                        for (i in familyLinksInChapter) {
+                        for (var i in familyLinksInChapter) {
 
-                            source = familyLinksInChapter[i][0]
-                            target = familyLinksInChapter[i][1]
+                            var source = familyLinksInChapter[i][0]
+                            var target = familyLinksInChapter[i][1]
 
                             if ((nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
                                 temp.push({ source: source, target: target });
@@ -429,11 +503,11 @@ function init() {
 
                         var normalise = Math.sqrt((dx * dx) + (dy * dy));
 
-                        var offSetX = midpoint_x + offset*(dy/normalise);
-                        var offSetY = midpoint_y - offset*(dx/normalise);
+                        var offSetX = dx != 0 ? midpoint_x + offset*(dy/normalise) : midpoint_x + offset;
+                        var offSetY = dy != 0 ? midpoint_y - offset*(dx/normalise) : midpoint_y + offset;
 
                         return "M " + d.source.x + "," + d.source.y +
-                            " S " + offSetX + "," + offSetY +
+                            " Q " + offSetX + "," + offSetY +
                             " " + d.target.x + "," + d.target.y;
                     }
 
@@ -456,97 +530,19 @@ function init() {
                         g.append("text").attr("x", "11%").attr("y", 250).text("Past chapters action").style("font-size", "20px").attr("alignment-baseline", "middle");
                     }
 
-                    function drawGraphUsageGuide(){
-                        var howToInteractWithGraph = d3.select("#graph").append("g").attr("id", "howToInteractWithGraph");
-                        howToInteractWithGraph.append("rect")
-                            .attr("class", "options")
-                            .attr("id", "options")
-                            .attr("x", "75%")
-                            .attr("y", "7%")
-                            .attr("width", "20%")
-                            .attr("height", 550)
-                            .style("fill", "#999");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("How to interact with graph:")
-                            .attr("x", "76%")
-                            .attr("y", "12%")
-                            .style("font-size", "30px")
-                            .style("font-weight", 700);
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("Click a node to show character")
-                            .attr("x", "76%")
-                            .attr("y", "16%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("informations.")
-                            .attr("x", "76%")
-                            .attr("y", "18%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("Hover with mouse on a link")
-                            .attr("x", "76%")
-                            .attr("y", "22%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("to show link informations.")
-                            .attr("x", "76%")
-                            .attr("y", "24%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("Scroll with mouse over the graph")
-                            .attr("x", "76%")
-                            .attr("y", "28%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("to zoom it.")
-                            .attr("x", "76%")
-                            .attr("y", "30%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("Drag the graph and move it")
-                            .attr("x", "76%")
-                            .attr("y", "34%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("around the screen.")
-                            .attr("x", "76%")
-                            .attr("y", "36%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("Hover with mouse on a node")
-                            .attr("x", "76%")
-                            .attr("y", "40%")
-                            .style("font-size", "20px");
-                        howToInteractWithGraph.append("text")
-                            .attr("class", "optionsText")
-                            .text("to show all connected nodes.")
-                            .attr("x", "76%")
-                            .attr("y", "42%")
-                            .style("font-size", "20px");
-                    }
-
                     function drawLinkInfos(link){
-                        if (d.srcElement.__data__.chapter == chapterNumber) {
-                            var azione = link.srcElement.__data__.action;
-                            var source = link.srcElement.__data__.source;
-                            var target = link.srcElement.__data__.target;
-                            var isFamily = link.srcElement.__data__.isFamily;
+                        var data = link.srcElement.__data__;
+                        if (data.chapter == chapterNumber) {
+                            var azione = data.action;
+                            var source = data.source;
+                            var target = data.target;
+                            var isFamily = data.isFamily;
                             if (!isFamily) {
                                 var edgeInfo = d3.select("#graph");
                                 edgeInfo.append("rect")
                                     .attr("class", "edgeAction")
                                     .attr("id", "nodeInfo")
-                                    .attr("x", "56%")
+                                    .attr("x", "40%")
                                     .attr("y", "7%")
                                     .attr("width", () => {
                                         var text = edgeInfo.append("text")
@@ -612,14 +608,14 @@ function init() {
                                                 if (azione == "ownership")
                                                     return source.label + " owns " + target.label + "."
                                             })
-                                            .attr("x", "57%")
+                                            .attr("x", "41%")
                                             .attr("y", "10%")
                                             .style("font-size", "20px");
                                         var bbox = text.node().getBBox();
                                         return bbox.width + 40;
                                     })
                                     .attr("height", 50)
-                                    .style("fill", "gray");
+                                    .style("fill", "#999");
                             }
                         }
                     }
@@ -695,20 +691,20 @@ function init() {
 
                         // Replace the input nodes and links with mutable objects for the simulation.
 
-                        nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
-                        linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i]]));
-                        familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
+                        var nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
+                        var linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i]]));
+                        var familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
-                        nodesInChapter = selectNodesInChapter(nodesInChapter);
-                        linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
-                        familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
-                        familyLinkInChapter = sortLinks(familyLinkInChapter);
+                        var nodesInChapter = selectNodesInChapter(nodesInChapter);
+                        var linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
+                        var familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
+                        var familyLinkInChapter = sortLinks(familyLinkInChapter);
 
                         linksInChapter.sort(function (a, b) {
-                            aSource = parseInt(a.source);
-                            bSource = parseInt(b.source);
-                            aTarget = parseInt(a.target);
-                            bTarget = parseInt(b.target);
+                            var aSource = parseInt(a.source);
+                            var bSource = parseInt(b.source);
+                            var aTarget = parseInt(a.target);
+                            var bTarget = parseInt(b.target);
                             if (aSource > bSource) { return 1; }
                             else if (aSource < bSource) { return -1; }
                             else {
@@ -773,7 +769,7 @@ function init() {
                             .on("mouseover", d => {
                                 drawLinkInfos(d);
                             })
-                            .on("mouseleave", d => {
+                            .on("mouseleave", () => {
                                 svg.selectAll(".edgeAction").remove();
                             });
 
@@ -796,6 +792,7 @@ function init() {
                                 // check all other nodes to see if they're connected
                                 // to this one. if so, keep the opacity at 1, otherwise
                                 // fade
+                                var thisOpacity = 1;
                                 var d = d.srcElement.__data__;
                                 circles.style("stroke-opacity", function(o) {
                                     thisOpacity = isConnected(d, o) ? 1 : opacity;
@@ -864,7 +861,7 @@ function init() {
                         }
 
                         function ticked() {
-                            
+
                             link.attr("d", positionLink)
                                 .attr("hostilityLevel", function (d) {
                                     return d.hostilityLevel;
@@ -898,7 +895,7 @@ function init() {
                     var links = result[1];
                     var family = result[2];
 
-                    chart = ForceGraph({ nodes, links, family }, {
+                    var chart = ForceGraph({ nodes, links, family }, {
                         nodeId: d => d.id,
                         nodeGroup: d => d.group,
                         nodeTitle: d => `${d.label}`,
