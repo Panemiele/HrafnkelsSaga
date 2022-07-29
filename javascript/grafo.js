@@ -13,16 +13,9 @@ var svgHeightScale = d3.scaleLinear();
 var svgWidthScale = d3.scaleLinear();
 
 // Select the svg from HTML
-var svg = d3.selectAll("#graph")
+var svg = d3.select("#graph")
     .attr("width", width)
     .attr("height", height);
-
-function reset() {
-    svg.selectAll(".info").remove();
-    svg.selectAll("#svgNodeInfo").remove();
-    d3.select(this).remove();
-    svg.style("box-shadow", "0 0 0 0px rgba(0,0,0,0.65)");
-}
 
 function init() {
     d3.json('./dataset/characters_nodes.json').then(function (nodesData) {
@@ -47,8 +40,97 @@ function init() {
                      */
 
 
+                    function drawGraphUsageGuide(){
+                        var howToInteractWithGraph = d3.select("#graph").append("g").attr("id", "howToInteractWithGraph");
+                        howToInteractWithGraph.append("rect")
+                            .attr("class", "options")
+                            .attr("id", "options")
+                            .attr("x", "75%")
+                            .attr("y", "7%")
+                            .attr("width", "20%")
+                            .attr("height", 550)
+                            .style("fill", "#999");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("How to interact with graph:")
+                            .attr("x", "76%")
+                            .attr("y", "12%")
+                            .style("font-size", "30px")
+                            .style("font-weight", 700);
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Click a node to show character")
+                            .attr("x", "76%")
+                            .attr("y", "16%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("informations.")
+                            .attr("x", "76%")
+                            .attr("y", "18%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Hover with mouse on a link")
+                            .attr("x", "76%")
+                            .attr("y", "22%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("to show link informations.")
+                            .attr("x", "76%")
+                            .attr("y", "24%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Scroll with mouse over the graph")
+                            .attr("x", "76%")
+                            .attr("y", "28%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("to zoom it.")
+                            .attr("x", "76%")
+                            .attr("y", "30%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Drag the graph and move it")
+                            .attr("x", "76%")
+                            .attr("y", "34%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("around the screen.")
+                            .attr("x", "76%")
+                            .attr("y", "36%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("Hover with mouse on a node")
+                            .attr("x", "76%")
+                            .attr("y", "40%")
+                            .style("font-size", "20px");
+                        howToInteractWithGraph.append("text")
+                            .attr("class", "optionsText")
+                            .text("to show all connected nodes.")
+                            .attr("x", "76%")
+                            .attr("y", "42%")
+                            .style("font-size", "20px");
+                    }
+
+
+                    function reset() {
+                        svg.selectAll(".info").remove();
+                        svg.selectAll("#svgNodeInfo").remove();
+                        d3.select(this).remove();
+                        svg.style("box-shadow", "0 0 0 0px rgba(0,0,0,0.65)");
+                        drawGraphUsageGuide();
+                        drawLegend();
+                    }
+
                     function isFamily(actions) {
-                        parental_actions = [];
+                        var parental_actions = [];
 
                         actions.forEach(function (azione) {
                             if (azione["isFamily"] == 1) {
@@ -56,7 +138,7 @@ function init() {
                             }
                         });
 
-                        families = [];
+                        var families = [];
                         edgesData.forEach(function (general_actions) {
                             if (parental_actions.indexOf(general_actions["action"]) != -1) {
 
@@ -68,8 +150,8 @@ function init() {
                                 }
 
                                 else {
-                                    aggiunto = 0;
-                                    for (i in families) {
+                                    var aggiunto = 0;
+                                    for (var i in families) {
                                         if (families[i].indexOf(general_actions["source"]) != -1) {
                                             if (families[i].indexOf(general_actions["target"]) != -1) {
                                                 aggiunto = 1
@@ -103,26 +185,26 @@ function init() {
                     }
 
                     function found_family(families, id_character) {
-                        for (i in families) {
+                        for (var i in families) {
                             if (families[i].indexOf(id_character) != -1) {
                                 return i;
                             }
                         }
 
-                        alone = families.length + parseInt(id_character);
+                        var alone = families.length + parseInt(id_character);
 
                         return alone;
                     }
 
                     function createclique(families) {
-                        edges = [];
-                        for (i in families) {
+                        var edges = [];
+                        for (var i in families) {
 
-                            for (j in families[i]) {
-                                source = families[i][j];
+                            for (var j in families[i]) {
+                                var source = families[i][j];
 
-                                for (h in families[i]) {
-                                    target = families[i][h]
+                                for (var h in families[i]) {
+                                    var target = families[i][h]
                                     if (j < h) {
                                         var edge = {
                                             "source": source,
@@ -139,8 +221,8 @@ function init() {
                     }
 
                     function setDistance(source, target, families) {
-                        source_family = found_family(families, source);
-                        target_family = found_family(families, target);
+                        var source_family = found_family(families, source);
+                        var target_family = found_family(families, target);
                         if (source_family == target_family) {
                             return 1;
                         }
@@ -154,7 +236,7 @@ function init() {
                         var characterEdges = [];
                         var familyEdges = [];
 
-                        families = isFamily(actions);
+                        var families = isFamily(actions);
 
                         nodesData.forEach(function (character) {
                             genderCodes.forEach(function (gender) {
@@ -188,53 +270,13 @@ function init() {
                             })
                         })
 
-                        familyEdges = createclique(families);
+                        var familyEdges = createclique(families);
 
                         result[0] = characterNodes;
                         result[1] = characterEdges;
                         result[2] = familyEdges;
                         return result;
                     }
-
-
-                    // /**
-                    //  * @param {characterId} the unique identifier for a character
-                    //  * @returns a new Array filled with all the nodes near to the given one
-                    //  */
-                    // function getLinkedNodes(characterId) {
-                    //     var linkedNodesIds = [];
-                    //     edgesData.forEach(e => {
-                    //         if (e.source == characterId) {
-                    //             linkedNodesIds.push(e.target);
-                    //         }
-                    //     })
-                    //     return linkedNodesIds;
-                    // }
-
-
-                    // /**
-                    //  * @param {characterId} the unique identifier for a character
-                    //  * @param {nodes} the Array of nodes
-                    //  * @returns all the character's informations
-                    //  */
-                    // function getCharacterById(characterId, nodes) {
-                    //     return find(nodes, characterId);
-                    // }
-
-
-                    // /**
-                    //  * This function changes the color of a particular given node
-                    //  * @param {node} the unique identifier for a node
-                    //  * @param {color} a string related to a color (in RGB)
-                    //  */
-                    // function updateNodesColor(node, color) {
-                    //     for (var i = 0; i < nodesData.length; i++) {
-                    //         var tmp = nodesData[i];
-                    //         if (tmp.id == node) {
-                    //             tmp.color = color;
-                    //         }
-                    //     }
-                    // }
 
 
                     /**
@@ -265,14 +307,14 @@ function init() {
                     }
 
                     function updateGraph() {
+                        reset();
                         chapterNumber = parseInt(document.querySelector('#rangeField').value);
-                        console.log("chapterNumber: " + chapterNumber);
                         svg.selectAll(".nodes").remove();
                         svg.selectAll(".links").remove();
                         chart = ForceGraph({ nodes, links, family }, {
                             nodeId: d => d.id,
                             nodeGroup: d => d.group,
-                            nodeTitle: d => `${d.id}\n${d.group}`,
+                            nodeTitle: d => `${d.label}`,
                             width,
                             height: 600,
                         });
@@ -280,7 +322,7 @@ function init() {
 
                     function selectNodesInChapter(nodesInChapter) {
                         var temp = []
-                        for (i in nodesInChapter) {
+                        for (var i in nodesInChapter) {
                             var nodeChapter = nodesInChapter[i][1];
                             if (nodeChapter == null || nodeChapter <= chapterNumber) {
                                 temp.push({ id: nodesInChapter[i][0], chapter: nodesInChapter[i][1], label: nodesInChapter[i][2], gender: nodesInChapter[i][3] });
@@ -291,35 +333,26 @@ function init() {
 
                     function selectLinksInChapter(linksInChapter, nodesInChapter) {
                         var temp = [];
-                        var temp2 = [];
                         var nodesIds = [];
 
-                        for (i in nodesInChapter) {
-                            nodesIC = parseInt(nodesInChapter[i].id)
+                        for (var i in nodesInChapter) {
+                            var nodesIC = parseInt(nodesInChapter[i].id)
                             nodesIds.push(nodesIC)
                         }
 
-                        for (i in linksInChapter) {
+                        for (var i in linksInChapter) {
 
-                            source = linksInChapter[i][0];
-                            target = linksInChapter[i][1];
-                            chapter = linksInChapter[i][2];
+                            var source = linksInChapter[i][0];
+                            var target = linksInChapter[i][1];
+                            var chapter = linksInChapter[i][2];
+                            var action = linksInChapter[i][3];
+                            var hostilityLevel = linksInChapter[i][4];
+                            var isFamily = linksInChapter[i][5];
 
                             if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily: linksInChapter[i][5] });
+                                temp.push({ source: source, target: target, chapter: chapter, action: action, hostilityLevel: hostilityLevel, isFamily: isFamily });
                             }
                         }
-                        for (i in linksInChapter) {
-
-                            source = linksInChapter[i][0];
-                            target = linksInChapter[i][1];
-                            chapter = linksInChapter[i][2];
-
-                            if (linksInChapter[i][2] == chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp2.push({ source: linksInChapter[i][0], target: linksInChapter[i][1], chapter: linksInChapter[i][2], action: linksInChapter[i][3], hostilityLevel: linksInChapter[i][4], isFamily: linksInChapter[i][5] });
-                            }
-                        }
-                        console.log(temp2);
                         return temp;
                     }
 
@@ -327,15 +360,15 @@ function init() {
                         var temp = [];
                         var nodesIds = [];
 
-                        for (i in nodesInChapter) {
-                            nodesIC = parseInt(nodesInChapter[i].id)
+                        for (var i in nodesInChapter) {
+                            var nodesIC = parseInt(nodesInChapter[i].id)
                             nodesIds.push(nodesIC)
                         }
 
-                        for (i in familyLinksInChapter) {
+                        for (var i in familyLinksInChapter) {
 
-                            source = familyLinksInChapter[i][0]
-                            target = familyLinksInChapter[i][1]
+                            var source = familyLinksInChapter[i][0]
+                            var target = familyLinksInChapter[i][1]
 
                             if ((nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
                                 temp.push({ source: source, target: target });
@@ -356,55 +389,281 @@ function init() {
                         });
                     }
 
-                    function ForceGraph({ nodes, links, family }, {
-                        nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
-                        nodeLabel = d => d.label,
-                        nodeGender = d => d.gender,
-                        nodeGroup, // given d in nodes, returns an (ordinal) value for color
-                        nodeGroups, // an array of ordinal values representing the node groups
-                        nodeTitle, // given d in nodes, a title string
-                        nodeFill = "currentColor", // node stroke fill (if not using a group color encoding)
-                        nodeStroke = "#fff", // node stroke color
-                        nodeStrokeWidth = 1.5, // node stroke width, in pixels
-                        nodeStrokeOpacity = 1, // node stroke opacity
-                        nodeRadius = 5, // node radius, in pixels
-                        nodeStrength,
-                        nodeChapter = ({ chapter }) => chapter,
-                        linkSource = ({ source }) => source, // given d in links, returns a node identifier string
-                        linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
-                        linkDistance = ({ distance }) => distance,
-                        /*linkStroke = function (links) {
-                            if (links.isFamily == 1)
-                                return "transparent";
-                           switch (links.hostilityLevel) {
-                                case 0:
-                                    return "green";
-                                case 1:
-                                    return "white";
-                                case 2:
-                                    return "orange";
-                                case 3:
-                                    return "red";
-                                default:
-                                    return "black"
+                    function openNodeInfos(d){
+                        var svgNodeInfo = d3.select("#graph")
+                                    .append("svg")
+                                    .attr("id", "svgNodeInfo")
+                                    .attr("width", 1000)
+                                    .attr("height", 250)
+                                    .attr("y", 350);
+                                svgNodeInfo.append("rect")
+                                    .attr("class", "info")
+                                    .attr("id", "nodeInfo")
+                                    .attr("x", "7%")
+                                    .attr("width", 400)
+                                    .attr("height", 300)
+                                    .style("fill", "gray");
+                                svgNodeInfo.append("text")
+                                    .attr("class", "info")
+                                    .text("Name: ")
+                                    .attr("x", "8%")
+                                    .attr("y", "10%")
+                                    .style("font-size", "20px")
+                                    .style("font-weight", 700)
+                                    .append("tspan")
+                                    .text(d.srcElement.__data__.label)
+                                    .style("font-weight", 300);
+                                svgNodeInfo.append("text")
+                                    .attr("class", "info")
+                                    .text("ID: ")
+                                    .style("font-weight", 700)
+                                    .attr("x", "8%")
+                                    .attr("y", "20%")
+                                    .style("font-size", "20px")
+                                    .append("tspan")
+                                    .text(d.srcElement.__data__.id)
+                                    .style("font-weight", 300);
+                                svgNodeInfo.append("text")
+                                    .attr("class", "info")
+                                    .text("Gender: ")
+                                    .attr("x", "8%")
+                                    .attr("y", "30%")
+                                    .style("font-size", "20px")
+                                    .style("font-weight", 700)
+                                    .append("tspan")
+                                    .text(d.srcElement.__data__.gender)
+                                    .style("font-weight", 300);
+                                svgNodeInfo.append("text")
+                                    .attr("class", "info")
+                                    .text(() => {
+                                        if (d.srcElement.__data__.chapter != "")
+                                            return "First appearance: ";
+                                    })
+                                    .attr("x", "8%")
+                                    .attr("y", "40%")
+                                    .style("font-size", "20px")
+                                    .style("font-weight", 700)
+                                    .append("tspan")
+                                    .text(function () {
+                                        if (d.srcElement.__data__.chapter != "")
+                                            return "chapter " + d.srcElement.__data__.chapter;
+                                    })
+                                    .style("font-weight", 300);
+                                svgNodeInfo.append("image")
+                                    .attr("class", "info")
+                                    .attr('x', "8%")
+                                    .attr('y', "50%")
+                                    .attr('width', 100)
+                                    .attr('height', 100)
+                                    .attr('href', 'assets/' + d.srcElement.__data__.id + '.jpeg')
+                                svgNodeInfo.append("rect")
+                                    .attr("class", "button")
+                                    .attr("id", "resetButton")
+                                    .attr("x", "30%")
+                                    .attr("y", "60%")
+                                    .attr("width", 40)
+                                    .attr("height", 30)
+                                    .style("fill", "white")
+                                    .on("click", reset);
+                                svgNodeInfo.append("text")
+                                    .attr("class", "info")
+                                    .text("Close")
+                                    .attr("x", "32%")
+                                    .attr("y", "70%")
+                                    .style("font-size", "20px");
+
+                                svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
+                    }
+
+                    function defineLinksColor(link){
+                        if (link.isFamily == 1)
+                            return "transparent"
+                        if (link.chapter < chapterNumber)
+                            return "#B1B1B1"
+                        if (link.hostilityLevel == 0)
+                            return "green"
+                        if (link.hostilityLevel == 1)
+                            return "white"
+                        if (link.hostilityLevel == 2)
+                            return "orange"
+                        if (link.hostilityLevel == 3)
+                            return "red"
+                    }
+
+                    // links are drawn as curved paths between nodes,
+                    // through the intermediate nodes
+                    function positionLink(d) {
+                        var offset = 30;
+
+                        var midpoint_x = (d.source.x + d.target.x) / 2;
+                        var midpoint_y = (d.source.y + d.target.y) / 2;
+
+                        var dx = (d.target.x - d.source.x);
+                        var dy = (d.target.y - d.source.y);
+
+                        var normalise = Math.sqrt((dx * dx) + (dy * dy));
+
+                        var offSetX = dx != 0 ? midpoint_x + offset*(dy/normalise) : midpoint_x + offset;
+                        var offSetY = dy != 0 ? midpoint_y - offset*(dx/normalise) : midpoint_y + offset;
+
+                        return "M " + d.source.x + "," + d.source.y +
+                            " Q " + offSetX + "," + offSetY +
+                            " " + d.target.x + "," + d.target.y;
+                    }
+
+                    function drawLegend(){
+                        // select the svg area
+                        var g = d3.select("#graph").append("g").attr("id", "legend");
+
+                        g.append("rect").attr("x", "7%").attr("y", 60).attr("width", 350).attr("height", 200).style("fill", "#999");
+                        // Handmade legend
+                        g.append("text").attr("x", "7.5%").attr("y", 100).text("Color -> Hostility level").style("font-size", "30px").style("font-weight", 700).attr("alignment-baseline", "left");
+                        g.append("rect").attr("x", "9%").attr("y", 130).attr("width", 23).attr("height", 7).style("fill", "white");
+                        g.append("rect").attr("x", "9%").attr("y", 160).attr("width", 23).attr("height", 7).style("fill", "green");
+                        g.append("rect").attr("x", "9%").attr("y", 190).attr("width", 23).attr("height", 7).style("fill", "orange");
+                        g.append("rect").attr("x", "9%").attr("y", 220).attr("width", 23).attr("height", 7).style("fill", "red");
+                        g.append("rect").attr("x", "9%").attr("y", 250).attr("width", 23).attr("height", 3).style("fill", "gray");
+                        g.append("text").attr("x", "11%").attr("y", 130).text("Neutral action").style("font-size", "20px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 160).text("Good action").style("font-size", "20px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 190).text("Bad action").style("font-size", "20px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 220).text("Very bad action").style("font-size", "20px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 250).text("Past chapters action").style("font-size", "20px").attr("alignment-baseline", "middle");
+                    }
+
+                    function drawLinkInfos(link){
+                        var data = link.srcElement.__data__;
+                        if (data.chapter == chapterNumber) {
+                            var azione = data.action;
+                            var source = data.source;
+                            var target = data.target;
+                            var isFamily = data.isFamily;
+                            if (!isFamily) {
+                                var edgeInfo = d3.select("#graph");
+                                edgeInfo.append("rect")
+                                    .attr("class", "edgeAction")
+                                    .attr("id", "nodeInfo")
+                                    .attr("x", "40%")
+                                    .attr("y", "7%")
+                                    .attr("width", () => {
+                                        var text = edgeInfo.append("text")
+                                            .attr("class", "edgeAction")
+                                            .attr("id", "edgeActionText")
+                                            .text(function (d) {
+                                                if (azione == "sibling")
+                                                    return source.label + " and " + target.label + " are sibling.";
+                                                if (azione == "descent")
+                                                    return source.label + " discends from " + target.label + ".";
+                                                if (azione == "marriage")
+                                                    return source.label + " and " + target.label + " marry."
+                                                if (azione == "fostering")
+                                                    return source.label + " supports " + target.label + "."
+                                                if (azione == "betrothal")
+                                                    return source.label + " declares his love to " + target.label + "."
+                                                if (azione == "inheritance")
+                                                    return source.label + " inherits " + target.label + "."
+                                                if (azione == "succession")
+                                                    return source.label + " succedes " + target.label + "."
+                                                if (azione == "placed in command")
+                                                    return source.label + " places in command " + target.label + "."
+                                                if (azione == "request assistance")
+                                                    return source.label + " requests assistance to " + target.label + "."
+                                                if (azione == "offer assistance")
+                                                    return source.label + " offers assistance to " + target.label + "."
+                                                if (azione == "provide information")
+                                                    return source.label + " provides informations to " + target.label + "."
+                                                if (azione == "discover information")
+                                                    return source.label + " discovers informations and refers to " + target.label + "."
+                                                if (azione == "invitation")
+                                                    return source.label + " invites " + target.label + "."
+                                                if (azione == "giftgiving")
+                                                    return source.label + " gives a present to " + target.label + "."
+                                                if (azione == "accusation")
+                                                    return source.label + " blames " + target.label + "."
+                                                if (azione == "summons")
+                                                    return source.label + " summons " + target.label + "."
+                                                if (azione == "lying")
+                                                    return source.label + " lies to " + target.label + "."
+                                                if (azione == "insult")
+                                                    return source.label + " insults " + target.label + "."
+                                                if (azione == "threat")
+                                                    return source.label + " threats " + target.label + "."
+                                                if (azione == "intervention")
+                                                    return source.label + " intervenes in " + target.label + "'s stuff."
+                                                if (azione == "challenge")
+                                                    return source.label + " challenges " + target.label + "."
+                                                if (azione == "hostility_non-lethal")
+                                                    return source.label + " is in non-lethal hostility with " + target.label + "."
+                                                if (azione == "hostility_lethal")
+                                                    return source.label + " is in lethal hostility with " + target.label + "."
+                                                if (azione == "conversation_neutral")
+                                                    return source.label + " converse with " + target.label + "."
+                                                if (azione == "death_neutral")
+                                                    return source.label + " kills neutrally " + target.label + "."
+                                                if (azione == "request information")
+                                                    return source.label + " requests informations to " + target.label + "."
+                                                if (azione == "name giving")
+                                                    return source.label + " gives a name to " + target.label + "."
+                                                if (azione == "suicide")
+                                                    return source.label + " commits suicide (" + target.label + " dies)."
+                                                if (azione == "ownership")
+                                                    return source.label + " owns " + target.label + "."
+                                            })
+                                            .attr("x", "41%")
+                                            .attr("y", "10%")
+                                            .style("font-size", "20px");
+                                        var bbox = text.node().getBBox();
+                                        return bbox.width + 40;
+                                    })
+                                    .attr("height", 50)
+                                    .style("fill", "#999");
                             }
-                        },*/ // link stroke color, scale based on hostility level (from 0 to 3)
-                        linkStrokeOpacity = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 0.85 : 0.4, // link stroke opacity
-                        // linkStrokeWidth = (link) => Object.values(link["chapter"]) == parseInt(chapterNumber) ? 8 : 3, // given d in links, returns a stroke width in pixels
-                        linkStrokeLinecap = "round", // link stroke linecap
-                        linkStrength,
-                        linkChapter = ({ chapter }) => chapter,
+                        }
+                    }
 
-                        linkIsFamily = ({ isFamily }) => isFamily,
-                        linkHostilityLevel = ({ hostilityLevel }) => hostilityLevel,
-                        linkAction = ({ action }) => action,
 
-                        colors = d3.schemeTableau10, // an array of color strings, for the node groups
-                        invalidation, // when this promise resolves, stop the simulation
-                        familySource = ({ source }) => source,
-                        familyTarget = ({ target }) => target,
-                        familyDistance = ({ distance }) => distance
-                    } = {}) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    function ForceGraph({ nodes, links, family }, {
+                            nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
+                            nodeLabel = d => d.label,
+                            nodeGender = d => d.gender,
+                            nodeGroup, // given d in nodes, returns an (ordinal) value for color
+                            nodeGroups, // an array of ordinal values representing the node groups
+                            nodeTitle = d => d.label, // given d in nodes, a title string
+                            nodeStrokeOpacity = 1, // node stroke opacity
+                            nodeRadius = 10, // node radius, in pixels
+                            nodeStrength,
+                            nodeChapter = ({ chapter }) => chapter,
+                            linkSource = ({ source }) => source, // given d in links, returns a node identifier string
+                            linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
+                            linkDistance = ({ distance }) => distance,
+                            linkStrokeOpacity = (link) => parseInt(link["chapter"]) == chapterNumber ? 1 : 0.2, // link stroke opacity
+                            linkStrokeLinecap = "round", // link stroke linecap
+                            linkStrength,
+                            linkChapter = ({ chapter }) => chapter,
+                            linkIsFamily = ({ isFamily }) => isFamily,
+                            linkHostilityLevel = ({ hostilityLevel }) => hostilityLevel,
+                            linkAction = ({ action }) => action,
+                            colors = d3.schemeTableau10, // an array of color strings, for the node groups
+                            invalidation, // when this promise resolves, stop the simulation
+                            familySource = ({ source }) => source,
+                            familyTarget = ({ target }) => target,
+                            familyDistance = ({ distance }) => distance
+                        } = {}) {
 
                         // Compute values.
                         const N = d3.map(nodes, nodeId).map(intern);
@@ -432,20 +691,20 @@ function init() {
 
                         // Replace the input nodes and links with mutable objects for the simulation.
 
-                        nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
-                        linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i]]));
-                        familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
+                        var nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
+                        var linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i]]));
+                        var familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
-                        nodesInChapter = selectNodesInChapter(nodesInChapter);
-                        linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
-                        familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
-                        familyLinkInChapter = sortLinks(familyLinkInChapter);
+                        var nodesInChapter = selectNodesInChapter(nodesInChapter);
+                        var linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
+                        var familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
+                        var familyLinkInChapter = sortLinks(familyLinkInChapter);
 
                         linksInChapter.sort(function (a, b) {
-                            aSource = parseInt(a.source);
-                            bSource = parseInt(b.source);
-                            aTarget = parseInt(a.target);
-                            bTarget = parseInt(b.target);
+                            var aSource = parseInt(a.source);
+                            var bSource = parseInt(b.source);
+                            var aTarget = parseInt(a.target);
+                            var bTarget = parseInt(b.target);
                             if (aSource > bSource) { return 1; }
                             else if (aSource < bSource) { return -1; }
                             else {
@@ -487,323 +746,131 @@ function init() {
                             .force("center", d3.forceCenter(xCenter, yCenter))
                             .on("tick", ticked);
 
-                        svg
-                            // .attr("viewBox", [-width / 2, -height / 2, width, height])
-                            .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+                        svg.attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
                         const link = svg.append("g")
                             .attr("class", "links")
-                            //  .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
                             .attr("fill", "transparent")
                             .attr("stroke-linecap", linkStrokeLinecap)
                             .selectAll("path")
                             .data(linksInChapter)
                             .join("path")
-                            .attr("stroke", function (d) {
-
-                                if (d.isFamily == 1)
-                                    return "transparent"
-                                if (d.chapter < chapterNumber)
-                                    return "gray"
-                                if (d.hostilityLevel == 0)
-                                    return "green"
-                                if (d.hostilityLevel == 1)
-                                    return "white"
-                                if (d.hostilityLevel == 2)
-                                    return "orange"
-                                if (d.hostilityLevel == 3)
-                                    return "red"
-                            })
-                            // .attr("stroke-width", link => linkStrokeWidth(link))
+                            .attr("stroke", l => defineLinksColor(l))
                             .attr("stroke-width", function (d) {
-                                // console.log(d.chapter + " " + parseInt(d.chapter) + " " + typeof(d.chapter));
                                 if (parseInt(d.chapter) == chapterNumber)
                                     return 8;
                                 else return 3;
                             })
                             .attr("stroke-opacity", function (d) {
-                                // console.log(d.chapter + " " + parseInt(d.chapter) + " " + typeof(d.chapter));
                                 if (parseInt(d.chapter) == chapterNumber)
-                                    return 0.84;
-                                else return 0.4;
+                                    return 1;
+                                else return 0.2;
                             })
-                            .on("mouseover", function (d) {
-                                if (d.srcElement.__data__.chapter == chapterNumber) {
-                                    console.log(d)
-                                    var azione = d.srcElement.__data__.action;
-                                    var source = d.srcElement.__data__.source;
-                                    var target = d.srcElement.__data__.target;
-                                    var isFamily = d.srcElement.__data__.isFamily;
-                                    if (!isFamily) {
-                                        var edgeInfo = d3.select("#graph");
-                                        edgeInfo.append("rect")
-                                            .attr("class", "edgeAction")
-                                            .attr("id", "nodeInfo")
-                                            .attr("x", "56%")
-                                            .attr("y", "7%")
-                                            .attr("width", () => {
-                                                var text = edgeInfo.append("text")
-                                                    .attr("class", "edgeAction")
-                                                    .attr("id", "edgeActionText")
-                                                    .text(function (d) {
-                                                        if (azione == "sibling")
-                                                            return source.label + " and " + target.label + " are sibling.";
-                                                        if (azione == "descent")
-                                                            return source.label + " discends from " + target.label + ".";
-                                                        if (azione == "marriage")
-                                                            return source.label + " and " + target.label + " marry."
-                                                        if (azione == "fostering")
-                                                            return source.label + " supports " + target.label + "."
-                                                        if (azione == "betrothal")
-                                                            return source.label + " declares his love to " + target.label + "."
-                                                        if (azione == "inheritance")
-                                                            return source.label + " inherits " + target.label + "."
-                                                        if (azione == "succession")
-                                                            return source.label + " succedes " + target.label + "."
-                                                        if (azione == "placed in command")
-                                                            return source.label + " places in command " + target.label + "."
-                                                        if (azione == "request assistance")
-                                                            return source.label + " requests assistance to " + target.label + "."
-                                                        if (azione == "offer assistance")
-                                                            return source.label + " offers assistance to " + target.label + "."
-                                                        if (azione == "provide information")
-                                                            return source.label + " provides informations to " + target.label + "."
-                                                        if (azione == "discover information")
-                                                            return source.label + " discovers informations and refers to " + target.label + "."
-                                                        if (azione == "invitation")
-                                                            return source.label + " invites " + target.label + "."
-                                                        if (azione == "giftgiving")
-                                                            return source.label + " gives a present to " + target.label + "."
-                                                        if (azione == "accusation")
-                                                            return source.label + " blames " + target.label + "."
-                                                        if (azione == "summons")
-                                                            return source.label + " summons " + target.label + "."
-                                                        if (azione == "lying")
-                                                            return source.label + " lies to " + target.label + "."
-                                                        if (azione == "insult")
-                                                            return source.label + " insults " + target.label + "."
-                                                        if (azione == "threat")
-                                                            return source.label + " threats " + target.label + "."
-                                                        if (azione == "intervention")
-                                                            return source.label + " intervenes in " + target.label + "'s stuff."
-                                                        if (azione == "challenge")
-                                                            return source.label + " challenges " + target.label + "."
-                                                        if (azione == "hostility_non-lethal")
-                                                            return source.label + " is in non-lethal hostility with " + target.label + "."
-                                                        if (azione == "hostility_lethal")
-                                                            return source.label + " is in lethal hostility with " + target.label + "."
-                                                        if (azione == "conversation_neutral")
-                                                            return source.label + " converse with " + target.label + "."
-                                                        if (azione == "death_neutral")
-                                                            return source.label + " kills neutrally " + target.label + "."
-                                                        if (azione == "request information")
-                                                            return source.label + " requests informations to " + target.label + "."
-                                                        if (azione == "name giving")
-                                                            return source.label + " gives a name to " + target.label + "."
-                                                        if (azione == "suicide")
-                                                            return source.label + " commits suicide (" + target.label + " dies)."
-                                                        if (azione == "ownership")
-                                                            return source.label + " owns " + target.label + "."
-                                                    })
-                                                    .attr("x", "57%")
-                                                    .attr("y", "10%")
-                                                    .style("font-size", "20px");
-                                                var bbox = text.node().getBBox();
-                                                return bbox.width + 40;
-                                            })
-                                            .attr("height", 50)
-                                            .style("fill", "gray");
-                                    }
-                                }
+                            .on("mouseover", d => {
+                                drawLinkInfos(d);
                             })
-                            .on("mouseleave", d => {
-                                console.log("ciao")
+                            .on("mouseleave", () => {
                                 svg.selectAll(".edgeAction").remove();
                             });
-                        // d3.select(this).remove();
-                        // .link.append("text")
-                        // .text("Ao");
-                        // console.log(azione);
-                        // console.log(source);
-                        // console.log(target);
 
+                        // build a dictionary of nodes that are linked
+                        var linkedByIndex = {};
+                        links.forEach(function(d) {
+                            if(d.isFamily == 0 && d.chapter <= chapterNumber){
+                                linkedByIndex[d.source + "," + d.target] = 1;
+                            }
+                        });
 
+                        // check the dictionary to see if nodes are linked
+                        function isConnected(a, b) {
+                            return linkedByIndex[a.id + "," + b.id] || linkedByIndex[b.id + "," + a.id] || a.id == b.id;
+                        }
 
-                        const node = svg.append("g")
+                        // fade nodes on hover
+                        function mouseOver(opacity) {
+                            return function(d) {
+                                // check all other nodes to see if they're connected
+                                // to this one. if so, keep the opacity at 1, otherwise
+                                // fade
+                                var thisOpacity = 1;
+                                var d = d.srcElement.__data__;
+                                circles.style("stroke-opacity", function(o) {
+                                    thisOpacity = isConnected(d, o) ? 1 : opacity;
+                                    return thisOpacity;
+                                });
+                                circles.style("fill-opacity", function(o) {
+                                    thisOpacity = isConnected(d, o) ? 1 : opacity;
+                                    return thisOpacity;
+                                });
+                                // also style link accordingly
+                                link.style("stroke-opacity", function(o) {
+                                    return o.source === d || o.target === d ? linkStrokeOpacity : opacity;
+                                });
+                                link.style("stroke", function(o){
+                                    return o.source === d || o.target === d ? defineLinksColor(o) : "#ddd";
+                                });
+                            };
+                        }
+
+                        function mouseOut() {
+                            circles.style("stroke-opacity", nodeStrokeOpacity);
+                            circles.style("fill-opacity", 1);
+                            link.style("stroke-opacity", linkStrokeOpacity);
+                            link.style("stroke", l => defineLinksColor(l));
+                        }
+                    
+                        var node = svg
+                            .append("g")
+                            .attr("id", "nodes")
                             .attr("class", "nodes")
-                            .attr("fill", nodeFill)
-                            .attr("stroke", nodeStroke)
-                            .attr("stroke-opacity", nodeStrokeOpacity)
-                            .attr("stroke-width", nodeStrokeWidth)
-                            .selectAll("circle")
+                            .attr("width", width)
+                            .attr("height", height)
+                            .selectAll(".node")
                             .data(nodesInChapter)
-                            .join("circle")
+                            .join("g")
+                            .attr("class", "node");
+
+                        var circles = node.append("circle")
+                            .attr("id", d => "node" + d.id)
                             .attr("r", nodeRadius)
                             .on("click", d => {
                                 reset();
-                                var svgNodeInfo = d3.select("#graph")
-                                    .append("svg")
-                                    .attr("id", "svgNodeInfo")
-                                    .attr("width", 1000)
-                                    .attr("height", 250)
-                                    .attr("y", 350);
-                                svgNodeInfo.append("rect")
-                                    .attr("class", "info")
-                                    .attr("id", "nodeInfo")
-                                    .attr("x", "7%")
-                                    .attr("width", 400)
-                                    .attr("height", 300)
-                                    .style("fill", "gray");
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("Name: " + d.srcElement.__data__.label)
-                                    .attr("x", "8%")
-                                    .attr("y", "10%")
-                                    .style("font-size", "20px");
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("ID: " + d.srcElement.__data__.id)
-                                    .attr("x", "8%")
-                                    .attr("y", "20%")
-                                    .style("font-size", "20px");
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("Gender: " + d.srcElement.__data__.gender)
-                                    .attr("x", "8%")
-                                    .attr("y", "30%")
-                                    .style("font-size", "20px")
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text(function () {
-                                        if (d.srcElement.__data__.chapter != "")
-                                            return "First appearance: " + d.srcElement.__data__.chapter + " chapter"
-                                    })
-                                    .attr("x", "8%")
-                                    .attr("y", "40%")
-                                    .style("font-size", "20px")
-                                svgNodeInfo.append("image")
-                                    .attr("class", "info")
-                                    .attr('x', "8%")
-                                    .attr('y', "50%")
-                                    .attr('width', 100)
-                                    .attr('height', 100)
-                                    .attr('href', 'assets/' + d.srcElement.__data__.id + '.jpeg')
-                                svgNodeInfo.append("rect")
-                                    .attr("class", "button")
-                                    .attr("id", "resetButton")
-                                    .attr("x", "30%")
-                                    .attr("y", "60%")
-                                    .attr("width", 40)
-                                    .attr("height", 30)
-                                    .style("fill", "white")
-                                    .on("click", reset);
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("Reset")
-                                    .attr("x", "32%")
-                                    .attr("y", "70%")
-                                    .style("font-size", "20px");
-
-
-                                svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
+                                openNodeInfos(d);
                             })
-
-                        var options = d3.select("#graph");
-                        options.append("rect")
-                            .attr("class", "options")
-                            .attr("id", "options")
-                            .attr("x", "75%")
-                            .attr("y", "7%")
-                            .attr("width", 350)
-                            .attr("height", 250)
-                            .style("fill", "gray");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("How to interact with graph:")
-                            .attr("x", "76%")
-                            .attr("y", "12%")
-                            .style("font-size", "25px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("Click a node to show cahracter")
-                            .attr("x", "76%")
-                            .attr("y", "16%")
-                            .style("font-size", "20px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("informations.")
-                            .attr("x", "76%")
-                            .attr("y", "18%")
-                            .style("font-size", "20px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("Hover with mouse on a link")
-                            .attr("x", "76%")
-                            .attr("y", "21%")
-                            .style("font-size", "20px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("to show link informations.")
-                            .attr("x", "76%")
-                            .attr("y", "23%")
-                            .style("font-size", "20px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("Scroll with mouse over the graph")
-                            .attr("x", "76%")
-                            .attr("y", "26%")
-                            .style("font-size", "20px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("to zoom it")
-                            .attr("x", "76%")
-                            .attr("y", "28%")
-                            .style("font-size", "20px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("Drag the graph and move it")
-                            .attr("x", "76%")
-                            .attr("y", "31%")
-                            .style("font-size", "20px");
-                        options.append("text")
-                            .attr("class", "optionsText")
-                            .text("along the screen")
-                            .attr("x", "76%")
-                            .attr("y", "33%")
-                            .style("font-size", "20px");
+                            .on("mouseover", mouseOver(.2))
+                            .on("mouseout", mouseOut);
+                            
+                        var nodeTitle = node.append("title").text(d => d.label);
+                        var nodeText = node.append("text")
+                                .attr("dx", 12)
+                                .attr("dy", ".35em")
+                                .text(d => d.label)
+                                .style("stroke", "black")
+                                .style("stroke-width", 0.5)
+                                .style("fill", "gray");
+                            
+                        if (invalidation != null) invalidation.then(() => simulation.stop());
 
 
                         svg.call(d3.zoom()
                             .scaleExtent([1 / 2, 8])
                             .on("zoom", zoomGraph));
 
-                        setWidthScaleDomainAndRange(nodesInChapter);
-                        setHeightScaleDomainAndRange(nodesInChapter);
-
-                        //if (L) link.attr("stroke", ({ index: i }) => L[i]);
-                        if (G) node.attr("fill", ({ index: i }) => color(G[i]));
-                        if (T) node.append("title").text(({ index: i }) => T[i]);
-                        if (invalidation != null) invalidation.then(() => simulation.stop());
-
                         function intern(value) {
                             return value !== null && typeof value === "object" ? value.valueOf() : value;
                         }
 
                         function ticked() {
-                            link
-                                .attr("d", function (d) {
-                                    var dx = d.target.x - d.source.x,
-                                        dy = d.target.y - d.source.y,
-                                        dr = 1000 / d.linknum;  //linknum is defined above
-                                    return "M " + d.source.x + "," + d.source.y + " Q " + (d.source.x + d.target.x) / 2 + " " + (d.source.y + d.target.y) / 2 + ", "/* + d.target.x + " " + d.target.y + ", " */ + d.target.x + " " + d.target.y;
-                                })
+
+                            link.attr("d", positionLink)
                                 .attr("hostilityLevel", function (d) {
                                     return d.hostilityLevel;
                                 });
 
-                            node
-                                .attr("cx", d => (d.x))
-                                .attr("cy", d => (d.y));
+                            circles.attr("cx", d => d.x)
+                                .attr("cy", d => d.y);
+                            nodeText.attr("x", d => d.x)
+                                .attr("y", d => d.y);
                         }
 
                         function zoomGraph(event) {
@@ -812,8 +879,6 @@ function init() {
                         }
 
                         function displayNames(d) {
-                            //console.log(d);
-
                             svg.append("rect").attr("x", "5.7%").attr("y", 300).attr("width", 400).attr("height", 200).style("fill", "white")
                         }
 
@@ -830,17 +895,18 @@ function init() {
                     var links = result[1];
                     var family = result[2];
 
-
-
-                    chart = ForceGraph({ nodes, links, family }, {
+                    var chart = ForceGraph({ nodes, links, family }, {
                         nodeId: d => d.id,
                         nodeGroup: d => d.group,
-                        nodeTitle: d => `${d.id}\n${d.group}`,
+                        nodeTitle: d => `${d.label}`,
                         width,
                         height,
                     });
 
                     document.body.addEventListener("change", updateGraph);
+
+                    drawLegend();
+                    drawGraphUsageGuide();
                 });
             });
         });

@@ -38,29 +38,11 @@
     </div>
 
     <div id="graphDiv" box-shadow="-1px 1px 5px 9px rgba(0,0,0,0.75)">
-        <svg id="graph">
-            <g id="my_dataviz" height=250 width=1000></g>
-        </svg>
+        <svg id="graph"></svg>
     </div>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script>
+    <script type="module" src="./javascript/grafo.js"></script>
 
-        // select the svg area
-        var g = d3.select("#my_dataviz");
-
-        g.append("rect").attr("x", "7%").attr("y", 60).attr("width", 320).attr("height", 200).style("fill", "gray");
-        // Handmade legend
-        g.append("text").attr("x", "7.5%").attr("y", 100).text("Color -> Hostility level").style("font-size", "30px").attr("alignment-baseline", "left")
-        g.append("rect").attr("x", "9%").attr("y", 130).attr("width", 23).attr("height", 7).style("fill", "white")
-        g.append("rect").attr("x", "9%").attr("y", 160).attr("width", 23).attr("height", 7).style("fill", "green")
-        g.append("rect").attr("x", "9%").attr("y", 190).attr("width", 23).attr("height", 7).style("fill", "orange")
-        g.append("rect").attr("x", "9%").attr("y", 220).attr("width", 23).attr("height", 7).style("fill", "red")
-        g.append("text").attr("x", "11%").attr("y", 130).text("Neutral").style("font-size", "20px").attr("alignment-baseline", "middle")
-        g.append("text").attr("x", "11%").attr("y", 160).text("Good").style("font-size", "20px").attr("alignment-baseline", "middle")
-        g.append("text").attr("x", "11%").attr("y", 190).text("Bad").style("font-size", "20px").attr("alignment-baseline", "middle")
-        g.append("text").attr("x", "11%").attr("y", 220).text("Very bad").style("font-size", "20px").attr("alignment-baseline", "middle")
-    </script>
-    <script src="./javascript/grafo.js"></script>
 </body>
 
 </html>
