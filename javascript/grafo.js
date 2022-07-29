@@ -543,23 +543,76 @@ function init() {
                                             .attr("y", "7%")
                                             .attr("width", () => {
                                                 var text = edgeInfo.append("text")
-                                                .attr("class", "edgeAction")
-                                                .attr("id", "edgeActionText")
-                                                .text(source.label + " --> " + azione + " --> " + target.label)
-                                                .attr("x", "57%")
-                                                .attr("y", "10%")
-                                                .style("font-size", "20px");
+                                                    .attr("class", "edgeAction")
+                                                    .attr("id", "edgeActionText")
+                                                    .text(function (d) {
+                                                        if (azione == "sibling")
+                                                            return source.label + " and " + target.label + " are sibling.";
+                                                        if (azione == "descent")
+                                                            return source.label + " discends from " + target.label + ".";
+                                                        if (azione == "marriage")
+                                                            return source.label + " and " + target.label + " marry."
+                                                        if (azione == "fostering")
+                                                            return source.label + " supports " + target.label + "."
+                                                        if (azione == "betrothal")
+                                                            return source.label + " declares his love to " + target.label + "."
+                                                        if (azione == "inheritance")
+                                                            return source.label + " inherits " + target.label + "."
+                                                        if (azione == "succession")
+                                                            return source.label + " succedes " + target.label + "."
+                                                        if (azione == "placed in command")
+                                                            return source.label + " places in command " + target.label + "."
+                                                        if (azione == "request assistance")
+                                                            return source.label + " requests assistance to " + target.label + "."
+                                                        if (azione == "offer assistance")
+                                                            return source.label + " offers assistance to " + target.label + "."
+                                                        if (azione == "provide information")
+                                                            return source.label + " provides informations to " + target.label + "."
+                                                        if (azione == "discover information")
+                                                            return source.label + " discovers informations and refers to " + target.label + "."
+                                                        if (azione == "invitation")
+                                                            return source.label + " invites " + target.label + "."
+                                                        if (azione == "giftgiving")
+                                                            return source.label + " gives a present to " + target.label + "."
+                                                        if (azione == "accusation")
+                                                            return source.label + " blames " + target.label + "."
+                                                        if (azione == "summons")
+                                                            return source.label + " summons " + target.label + "."
+                                                        if (azione == "lying")
+                                                            return source.label + " lies to " + target.label + "."
+                                                        if (azione == "insult")
+                                                            return source.label + " insults " + target.label + "."
+                                                        if (azione == "threat")
+                                                            return source.label + " threats " + target.label + "."
+                                                        if (azione == "intervention")
+                                                            return source.label + " intervenes in " + target.label + "'s stuff."
+                                                        if (azione == "challenge")
+                                                            return source.label + " challenges " + target.label + "."
+                                                        if (azione == "hostility_non-lethal")
+                                                            return source.label + " is in non-lethal hostility with " + target.label + "."
+                                                        if (azione == "hostility_lethal")
+                                                            return source.label + " is in lethal hostility with " + target.label + "."
+                                                        if (azione == "conversation_neutral")
+                                                            return source.label + " converse with " + target.label + "."
+                                                        if (azione == "death_neutral")
+                                                            return source.label + " kills neutrally " + target.label + "."
+                                                        if (azione == "request information")
+                                                            return source.label + " requests informations to " + target.label + "."
+                                                        if (azione == "name giving")
+                                                            return source.label + " gives a name to " + target.label + "."
+                                                        if (azione == "suicide")
+                                                            return source.label + " commits suicide (" + target.label + " dies)."
+                                                        if (azione == "ownership")
+                                                            return source.label + " owns " + target.label + "."
+                                                    })
+                                                    .attr("x", "57%")
+                                                    .attr("y", "10%")
+                                                    .style("font-size", "20px");
                                                 var bbox = text.node().getBBox();
                                                 return bbox.width + 40;
                                             })
                                             .attr("height", 50)
                                             .style("fill", "gray");
-                                        edgeInfo.append("text")
-                                            .attr("class", "edgeAction")
-                                            .text(source.label + " ---> " + azione + " ---> " + target.label)
-                                            .attr("x", "58%")
-                                            .attr("y", "10%")
-                                            .style("font-size", "20px");
                                     }
                                 }
                             })
@@ -742,7 +795,7 @@ function init() {
                                     var dx = d.target.x - d.source.x,
                                         dy = d.target.y - d.source.y,
                                         dr = 1000 / d.linknum;  //linknum is defined above
-                                    return "M " + d.source.x + "," + d.source.y + " Q " + (d.source.x + d.target.x)/2 + " " + (d.source.y + d.target.y)/2 + ", "/* + d.target.x + " " + d.target.y + ", " */ + d.target.x + " " + d.target.y;
+                                    return "M " + d.source.x + "," + d.source.y + " Q " + (d.source.x + d.target.x) / 2 + " " + (d.source.y + d.target.y) / 2 + ", "/* + d.target.x + " " + d.target.y + ", " */ + d.target.x + " " + d.target.y;
                                 })
                                 .attr("hostilityLevel", function (d) {
                                     return d.hostilityLevel;
