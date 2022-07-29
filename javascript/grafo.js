@@ -1,16 +1,10 @@
 // Variables definitions
 var nodeRadius = 20;
-var margin = { top: 40, right: 20, bottom: 40, left: 20 }; // to memorize the margins
 var width = "100%";
-var height = 800;
-var updateTime = 1000; // time for transitions
-var imageSize = 40;
+var height = 700;
 var chapterNumber = parseInt(document.querySelector('#rangeField').value);
-var xCenter = 1000,
-    yCenter = 400;
-// Scales definitions
-var svgHeightScale = d3.scaleLinear();
-var svgWidthScale = d3.scaleLinear();
+var xCenter = 700,
+    yCenter = 300;
 
 // Select the svg from HTML
 var svg = d3.select("#graph")
@@ -47,7 +41,7 @@ function init() {
                             .attr("id", "options")
                             .attr("x", "75%")
                             .attr("y", "7%")
-                            .attr("width", "20%")
+                            .attr("width", "22%")
                             .attr("height", 550)
                             .style("fill", "#999");
                         howToInteractWithGraph.append("text")
@@ -55,68 +49,68 @@ function init() {
                             .text("How to interact with graph:")
                             .attr("x", "76%")
                             .attr("y", "12%")
-                            .style("font-size", "30px")
+                            .style("font-size", "22px")
                             .style("font-weight", 700);
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("Click a node to show character")
                             .attr("x", "76%")
                             .attr("y", "16%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("informations.")
                             .attr("x", "76%")
                             .attr("y", "18%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("Hover with mouse on a link")
                             .attr("x", "76%")
                             .attr("y", "22%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("to show link informations.")
                             .attr("x", "76%")
                             .attr("y", "24%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("Scroll with mouse over the graph")
                             .attr("x", "76%")
                             .attr("y", "28%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("to zoom it.")
                             .attr("x", "76%")
                             .attr("y", "30%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("Drag the graph and move it")
                             .attr("x", "76%")
                             .attr("y", "34%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("around the screen.")
                             .attr("x", "76%")
                             .attr("y", "36%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("Hover with mouse on a node")
                             .attr("x", "76%")
                             .attr("y", "40%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
                             .text("to show all connected nodes.")
                             .attr("x", "76%")
                             .attr("y", "42%")
-                            .style("font-size", "20px");
+                            .style("font-size", "13px");
                     }
 
 
@@ -408,7 +402,7 @@ function init() {
                                     .text("Name: ")
                                     .attr("x", "8%")
                                     .attr("y", "10%")
-                                    .style("font-size", "20px")
+                                    .style("font-size", "13px")
                                     .style("font-weight", 700)
                                     .append("tspan")
                                     .text(d.srcElement.__data__.label)
@@ -419,7 +413,7 @@ function init() {
                                     .style("font-weight", 700)
                                     .attr("x", "8%")
                                     .attr("y", "20%")
-                                    .style("font-size", "20px")
+                                    .style("font-size", "13px")
                                     .append("tspan")
                                     .text(d.srcElement.__data__.id)
                                     .style("font-weight", 300);
@@ -428,7 +422,7 @@ function init() {
                                     .text("Gender: ")
                                     .attr("x", "8%")
                                     .attr("y", "30%")
-                                    .style("font-size", "20px")
+                                    .style("font-size", "13px")
                                     .style("font-weight", 700)
                                     .append("tspan")
                                     .text(d.srcElement.__data__.gender)
@@ -441,7 +435,7 @@ function init() {
                                     })
                                     .attr("x", "8%")
                                     .attr("y", "40%")
-                                    .style("font-size", "20px")
+                                    .style("font-size", "13px")
                                     .style("font-weight", 700)
                                     .append("tspan")
                                     .text(function () {
@@ -470,7 +464,7 @@ function init() {
                                     .text("Close")
                                     .attr("x", "32%")
                                     .attr("y", "70%")
-                                    .style("font-size", "20px");
+                                    .style("font-size", "13px");
 
                                 svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
                     }
@@ -515,19 +509,19 @@ function init() {
                         // select the svg area
                         var g = d3.select("#graph").append("g").attr("id", "legend");
 
-                        g.append("rect").attr("x", "7%").attr("y", 60).attr("width", 350).attr("height", 200).style("fill", "#999");
+                        g.append("rect").attr("x", "7%").attr("y", 60).attr("width", 300).attr("height", 160).style("fill", "#999");
                         // Handmade legend
-                        g.append("text").attr("x", "7.5%").attr("y", 100).text("Color -> Hostility level").style("font-size", "30px").style("font-weight", 700).attr("alignment-baseline", "left");
-                        g.append("rect").attr("x", "9%").attr("y", 130).attr("width", 23).attr("height", 7).style("fill", "white");
-                        g.append("rect").attr("x", "9%").attr("y", 160).attr("width", 23).attr("height", 7).style("fill", "green");
-                        g.append("rect").attr("x", "9%").attr("y", 190).attr("width", 23).attr("height", 7).style("fill", "orange");
-                        g.append("rect").attr("x", "9%").attr("y", 220).attr("width", 23).attr("height", 7).style("fill", "red");
-                        g.append("rect").attr("x", "9%").attr("y", 250).attr("width", 23).attr("height", 3).style("fill", "gray");
-                        g.append("text").attr("x", "11%").attr("y", 130).text("Neutral action").style("font-size", "20px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 160).text("Good action").style("font-size", "20px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 190).text("Bad action").style("font-size", "20px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 220).text("Very bad action").style("font-size", "20px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 250).text("Past chapters action").style("font-size", "20px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "7.5%").attr("y", 100).text("Color -> Hostility level").style("font-size", "25px").style("font-weight", 700).attr("alignment-baseline", "left");
+                        g.append("rect").attr("x", "9%").attr("y", 120).attr("width", 23).attr("height", 7).style("fill", "white");
+                        g.append("rect").attr("x", "9%").attr("y", 140).attr("width", 23).attr("height", 7).style("fill", "green");
+                        g.append("rect").attr("x", "9%").attr("y", 160).attr("width", 23).attr("height", 7).style("fill", "orange");
+                        g.append("rect").attr("x", "9%").attr("y", 180).attr("width", 23).attr("height", 7).style("fill", "red");
+                        g.append("rect").attr("x", "9%").attr("y", 200).attr("width", 23).attr("height", 3).style("fill", "gray");
+                        g.append("text").attr("x", "11%").attr("y", 120).text("Neutral action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 140).text("Good action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 160).text("Bad action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 180).text("Very bad action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "11%").attr("y", 200).text("Past chapters action").style("font-size", "13px").attr("alignment-baseline", "middle");
                     }
 
                     function drawLinkInfos(link){
@@ -610,7 +604,7 @@ function init() {
                                             })
                                             .attr("x", "41%")
                                             .attr("y", "10%")
-                                            .style("font-size", "20px");
+                                            .style("font-size", "13px");
                                         var bbox = text.node().getBBox();
                                         return bbox.width + 40;
                                     })
