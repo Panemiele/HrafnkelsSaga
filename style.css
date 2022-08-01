@@ -75,10 +75,6 @@ datalist {
     width: 100%;
 }
 
-option {
-    margin-left: 10;
-}
-
 
 input[type=range] {
   -webkit-appearance: none;

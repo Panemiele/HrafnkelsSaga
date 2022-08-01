@@ -42,7 +42,7 @@ function init() {
                             .attr("x", "75%")
                             .attr("y", "7%")
                             .attr("width", "22%")
-                            .attr("height", 550)
+                            .attr("height", 260)
                             .style("fill", "#999");
                         howToInteractWithGraph.append("text")
                             .attr("class", "optionsText")
@@ -272,46 +272,24 @@ function init() {
                         return result;
                     }
 
-
-                    /**
-                     * Starting from a circle list, this function gets the maximum and the minimum values of
-                     * circles' centers' horizontal position and sets the corresponding scale's domain and range
-                     * @param {circles} the list of circles
-                     */
-                    function setWidthScaleDomainAndRange(circles) {
-                        maxCoordX = d3.max(circles, function (d) {
-                            return d.x
-                        });
-                        minCoordX = d3.min(circles, function (d) { return d.x });
-                        svgWidthScale.domain([minCoordX, maxCoordX]);
-                        svgWidthScale.range([-370, 370]);
-                    }
-
-
-                    /**
-                     * Starting from a circle list, this function gets the maximum and the minimum values of
-                     * circles' centers' vertical position and sets the corresponding scale's domain and range
-                     * @param {circles} the list of circles
-                     */
-                    function setHeightScaleDomainAndRange(circles) {
-                        maxCoordY = d3.max(circles, function (d) { return d.y });
-                        minCoordY = d3.min(circles, function (d) { return d.y });
-                        svgHeightScale.domain([minCoordY, maxCoordY])
-                        svgHeightScale.range([-320, 320]);
-                    }
-
                     function updateGraph() {
                         reset();
                         chapterNumber = parseInt(document.querySelector('#rangeField').value);
                         svg.selectAll(".nodes").remove();
                         svg.selectAll(".links").remove();
-                        chart = ForceGraph({ nodes, links, family }, {
+                        svg.select("#legend").remove();
+                        svg.select("#howToInteractWithGraph").remove();
+                        sortLinks(links);
+                        setLinkIndexAndNum(links);
+                        ForceGraph({ nodes, links, family }, {
                             nodeId: d => d.id,
                             nodeGroup: d => d.group,
                             nodeTitle: d => `${d.label}`,
                             width,
                             height: 600,
                         });
+                        drawLegend();
+                        drawGraphUsageGuide();
                     }
 
                     function selectNodesInChapter(nodesInChapter) {
@@ -369,18 +347,6 @@ function init() {
                             }
                         }
                         return temp;
-                    }
-
-                    function sortLinks(linksToSort) {
-                        return linksToSort.sort(function (a, b) {
-                            if (a.source > b.source) { return 1; }
-                            else if (a.source < b.source) { return -1; }
-                            else {
-                                if (a.target > b.target) { return 1; }
-                                if (a.target < b.target) { return -1; }
-                                else { return 0; }
-                            }
-                        });
                     }
 
                     function openNodeInfos(d){
@@ -447,8 +413,8 @@ function init() {
                                     .attr("class", "info")
                                     .attr('x', "8%")
                                     .attr('y', "50%")
-                                    .attr('width', 100)
-                                    .attr('height', 100)
+                                    .attr('width', 120)
+                                    .attr('height', 120)
                                     .attr('href', 'assets/' + d.srcElement.__data__.id + '.jpeg')
                                 svgNodeInfo.append("rect")
                                     .attr("class", "button")
@@ -472,37 +438,53 @@ function init() {
                     function defineLinksColor(link){
                         if (link.isFamily == 1)
                             return "transparent"
-                        if (link.chapter < chapterNumber)
-                            return "#B1B1B1"
+                        if (link.chapter < chapterNumber){
+                            return "#B1B1B1";
+                        }
                         if (link.hostilityLevel == 0)
-                            return "green"
+                            return "green";
                         if (link.hostilityLevel == 1)
-                            return "white"
+                            return "white";
                         if (link.hostilityLevel == 2)
-                            return "orange"
+                            return "orange";
                         if (link.hostilityLevel == 3)
-                            return "red"
+                            return "red";
                     }
 
+                    var mLinkNum = {};
+
+                    var counter = 2;
                     // links are drawn as curved paths between nodes,
                     // through the intermediate nodes
-                    function positionLink(d) {
-                        var offset = 30;
+                    function positionLink(d, mLinkNum) {
+                        var dx = d.target.x - d.source.x,
+                        dy = d.target.y - d.source.y,
+                        dr = Math.sqrt(dx * dx + dy * dy);
+                        // get the total link numbers between source and target node
+                        var lTotalLinkNum = mLinkNum[d.source.id + "," + d.target.id] || mLinkNum[d.target.id + "," + d.source.id];
+                        if(lTotalLinkNum > 1){
+                            // if there are multiple links between these two nodes, we need generate different dr for each path
+                            dr = dr/(1 + (1/lTotalLinkNum) * (d.index - 1));
+                            if(counter > 0 ){
+                                console.log(dr);
+                                counter--;
+                            }
+                        }
 
-                        var midpoint_x = (d.source.x + d.target.x) / 2;
-                        var midpoint_y = (d.source.y + d.target.y) / 2;
+                        // generate svg path
+                        const dToReturn = "M " + d.source.x + "," + d.source.y + 
+                        " A " + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y + 
+                        " A " + dr + "," + dr + " 0 0 0," + d.source.x + "," + d.source.y;
 
-                        var dx = (d.target.x - d.source.x);
-                        var dy = (d.target.y - d.source.y);
+                        if(chapterNumber == 4 && d.source.id==23 && d.target.id==24){
+                            console.log("d: ");
+                            console.log(d);
+                            console.log(dToReturn);
+                            console.log("\n\n\n");
+                        }
 
-                        var normalise = Math.sqrt((dx * dx) + (dy * dy));
+                        return dToReturn;
 
-                        var offSetX = dx != 0 ? midpoint_x + offset*(dy/normalise) : midpoint_x + offset;
-                        var offSetY = dy != 0 ? midpoint_y - offset*(dx/normalise) : midpoint_y + offset;
-
-                        return "M " + d.source.x + "," + d.source.y +
-                            " Q " + offSetX + "," + offSetY +
-                            " " + d.target.x + "," + d.target.y;
                     }
 
                     function drawLegend(){
@@ -614,6 +596,37 @@ function init() {
                         }
                     }
 
+                    // sort the links by source, then target
+                    function sortLinks(linksToSort){								
+                        return linksToSort.sort(function(a,b) {
+                            if (a.source > b.source) { return 1; }
+                            else if (a.source < b.source) { return -1; }
+                            else{
+                                if (a.target > b.target) { return 1; }
+                                if (a.target < b.target){ return -1; }
+                                else { return 0; }
+                            }
+                        });
+                    }
+
+                    //any links with duplicate source and target get an incremented 'linknum'
+                    function setLinkIndexAndNum(links){								
+                        for (var i = 0; i < links.length; i++) 
+                        {
+                            if (i != 0 && links[i].source == links[i-1].source && links[i].target == links[i-1].target) {
+                                links[i].index = links[i-1].index + 1;
+                            }
+                            else {
+                                links[i].index = 1;
+                            }
+                            // save the total number of links between two node
+                                mLinkNum[links[i].source + "," + links[i].target] = links[i].index;
+                            if(links[i].source == 18 && links[i].target == 9){
+                                var a = mLinkNum[links[i].source + "," + links[i].target];
+                            }
+                        }
+                    }
+
 
 
 
@@ -693,27 +706,6 @@ function init() {
                         var linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
                         var familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
                         var familyLinkInChapter = sortLinks(familyLinkInChapter);
-
-                        linksInChapter.sort(function (a, b) {
-                            var aSource = parseInt(a.source);
-                            var bSource = parseInt(b.source);
-                            var aTarget = parseInt(a.target);
-                            var bTarget = parseInt(b.target);
-                            if (aSource > bSource) { return 1; }
-                            else if (aSource < bSource) { return -1; }
-                            else {
-                                if (aTarget > bTarget) { return 1; }
-                                if (aTarget < bTarget) { return -1; }
-                                else { return 0; }
-                            }
-                        });
-                        //any links with duplicate source and target get an incremented 'linknum'
-                        for (var i = 0; i < linksInChapter.length; i++) {
-                            if (i != 0 && linksInChapter[i].source == linksInChapter[i - 1].source && linksInChapter[i].target == linksInChapter[i - 1].target) {
-                                linksInChapter[i].linknum = linksInChapter[i - 1].linknum + 5;
-                            }
-                            else { linksInChapter[i].linknum = 1; };
-                        };
 
 
 
@@ -798,10 +790,10 @@ function init() {
                                 });
                                 // also style link accordingly
                                 link.style("stroke-opacity", function(o) {
-                                    return o.source === d || o.target === d ? linkStrokeOpacity : opacity;
+                                    return o.source === d || o.target === d ? 1 : opacity;
                                 });
                                 link.style("stroke", function(o){
-                                    return o.source === d || o.target === d ? defineLinksColor(o) : "#ddd";
+                                    return o.source === d || o.target === d ? defineLinksColor(o) : "transparent";
                                 });
                             };
                         }
@@ -831,7 +823,7 @@ function init() {
                                 reset();
                                 openNodeInfos(d);
                             })
-                            .on("mouseover", mouseOver(.2))
+                            .on("mouseover", mouseOver(0.2))
                             .on("mouseout", mouseOut);
                             
                         var nodeTitle = node.append("title").text(d => d.label);
@@ -842,7 +834,7 @@ function init() {
                                 .style("stroke", "black")
                                 .style("stroke-width", 0.5)
                                 .style("fill", "gray");
-                            
+
                         if (invalidation != null) invalidation.then(() => simulation.stop());
 
 
@@ -856,7 +848,7 @@ function init() {
 
                         function ticked() {
 
-                            link.attr("d", positionLink)
+                            link.attr("d", d => positionLink(d, mLinkNum))
                                 .attr("hostilityLevel", function (d) {
                                     return d.hostilityLevel;
                                 });
@@ -888,8 +880,11 @@ function init() {
                     var nodes = result[0];
                     var links = result[1];
                     var family = result[2];
+                    
+                    sortLinks(links);
+                    setLinkIndexAndNum(links);
 
-                    var chart = ForceGraph({ nodes, links, family }, {
+                    ForceGraph({ nodes, links, family }, {
                         nodeId: d => d.id,
                         nodeGroup: d => d.group,
                         nodeTitle: d => `${d.label}`,
@@ -897,10 +892,11 @@ function init() {
                         height,
                     });
 
-                    document.body.addEventListener("change", updateGraph);
-
                     drawLegend();
                     drawGraphUsageGuide();
+
+                    document.body.addEventListener("change", updateGraph);
+
                 });
             });
         });
