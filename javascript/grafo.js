@@ -279,8 +279,8 @@ function init() {
                         svg.selectAll(".links").remove();
                         svg.select("#legend").remove();
                         svg.select("#howToInteractWithGraph").remove();
-                        sortLinks(links);
-                        setLinkIndexAndNum(links);
+                        links = sortLinks(links);
+                        links = links.map(l => setLinkoccurrencyAndNumIterative(l));
                         ForceGraph({ nodes, links, family }, {
                             nodeId: d => d.id,
                             nodeGroup: d => d.group,
@@ -320,9 +320,10 @@ function init() {
                             var action = linksInChapter[i][3];
                             var hostilityLevel = linksInChapter[i][4];
                             var isFamily = linksInChapter[i][5];
+                            var occurrency = linksInChapter[i][6];
 
                             if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
-                                temp.push({ source: source, target: target, chapter: chapter, action: action, hostilityLevel: hostilityLevel, isFamily: isFamily });
+                                temp.push({ source: source, target: target, chapter: chapter, action: action, hostilityLevel: hostilityLevel, isFamily: isFamily, occurrency: occurrency });
                             }
                         }
                         return temp;
@@ -453,36 +454,26 @@ function init() {
 
                     var mLinkNum = {};
 
-                    var counter = 2;
                     // links are drawn as curved paths between nodes,
                     // through the intermediate nodes
                     function positionLink(d, mLinkNum) {
-                        var dx = d.target.x - d.source.x,
-                        dy = d.target.y - d.source.y,
-                        dr = Math.sqrt(dx * dx + dy * dy);
+                        var dx = d.target.x - d.source.x;
+                        var dy = d.target.y - d.source.y;
+                        var dr = Math.sqrt(dx * dx + dy * dy);
                         // get the total link numbers between source and target node
                         var lTotalLinkNum = mLinkNum[d.source.id + "," + d.target.id] || mLinkNum[d.target.id + "," + d.source.id];
                         if(lTotalLinkNum > 1){
                             // if there are multiple links between these two nodes, we need generate different dr for each path
-                            dr = dr/(1 + (1/lTotalLinkNum) * (d.index - 1));
-                            if(counter > 0 ){
-                                console.log(dr);
-                                counter--;
-                            }
+                            dr = (dr/(1 + (1/lTotalLinkNum) * (d.occurrency - 1)));
                         }
 
                         // generate svg path
-                        const dToReturn = "M " + d.source.x + "," + d.source.y + 
-                        " A " + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y + 
-                        " A " + dr + "," + dr + " 0 0 0," + d.source.x + "," + d.source.y;
+                        var dToReturn = "M " + d.source.x + "," + d.source.y + 
+                        " A " + dr + " " + dr + " 0 0 1," + d.target.x + " " + d.target.y;
 
-                        if(chapterNumber == 4 && d.source.id==23 && d.target.id==24){
-                            console.log("d: ");
-                            console.log(d);
-                            console.log(dToReturn);
-                            console.log("\n\n\n");
+                        if(d.target.x == d.source.x && d.target.y == d.source.y){
+                            dToReturn = "M " + d.source.x + "," + d.source.y + " A 100 100 0 0 1," + d.target.x + " " + d.target.y;
                         }
-
                         return dToReturn;
 
                     }
@@ -597,16 +588,17 @@ function init() {
                     }
 
                     // sort the links by source, then target
-                    function sortLinks(linksToSort){								
-                        return linksToSort.sort(function(a,b) {
-                            if (a.source > b.source) { return 1; }
-                            else if (a.source < b.source) { return -1; }
+                    function sortLinks(linksToSort){	
+                        var sortedLinks = linksToSort.sort(function(a,b) {
+                            if (parseInt(a.source) > parseInt(b.source)) { return 1; }
+                            else if (parseInt(a.source) < parseInt(b.source)) { return -1; }
                             else{
-                                if (a.target > b.target) { return 1; }
-                                if (a.target < b.target){ return -1; }
+                                if (parseInt(a.target) > parseInt(b.target)) { return 1; }
+                                if (parseInt(a.target) < parseInt(b.target)){ return -1; }
                                 else { return 0; }
                             }
                         });
+                        return sortedLinks;
                     }
 
                     //any links with duplicate source and target get an incremented 'linknum'
@@ -614,17 +606,27 @@ function init() {
                         for (var i = 0; i < links.length; i++) 
                         {
                             if (i != 0 && links[i].source == links[i-1].source && links[i].target == links[i-1].target) {
-                                links[i].index = links[i-1].index + 1;
+                                links[i].occurrency = links[i-1].occurrency + 1;
                             }
                             else {
-                                links[i].index = 1;
+                                links[i].occurrency = 1;
                             }
                             // save the total number of links between two node
-                                mLinkNum[links[i].source + "," + links[i].target] = links[i].index;
-                            if(links[i].source == 18 && links[i].target == 9){
-                                var a = mLinkNum[links[i].source + "," + links[i].target];
-                            }
+                            mLinkNum[links[i].source + "," + links[i].target] = links[i].occurrency;
                         }
+                    }
+
+                    //any links with duplicate source and target get an incremented 'linknum'
+                    function setLinkoccurrencyAndNumIterative(l){
+                        if (!isNaN(mLinkNum[l.source + "," + l.target])) {
+                            l.occurrency = mLinkNum[l.source + "," + l.target] + 1;
+                        }
+                        else {
+                            l.occurrency = 1;
+                        }
+                        // save the total number of links between two node
+                        mLinkNum[l.source + "," + l.target] = l.occurrency;
+                        return l;
                     }
 
 
@@ -657,6 +659,7 @@ function init() {
                             nodeChapter = ({ chapter }) => chapter,
                             linkSource = ({ source }) => source, // given d in links, returns a node identifier string
                             linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
+                            linkoccurrency = ({ occurrency }) => occurrency,
                             linkDistance = ({ distance }) => distance,
                             linkStrokeOpacity = (link) => parseInt(link["chapter"]) == chapterNumber ? 1 : 0.2, // link stroke opacity
                             linkStrokeLinecap = "round", // link stroke linecap
@@ -673,23 +676,21 @@ function init() {
                         } = {}) {
 
                         // Compute values.
-                        const N = d3.map(nodes, nodeId).map(intern);
-                        const NLabel = d3.map(nodes, nodeLabel).map(intern);
-                        const NGender = d3.map(nodes, nodeGender).map(intern);
-                        const NC = d3.map(nodes, nodeChapter).map(intern);
+                        const N = d3.map(nodes, nodeId).map(intern);    //map a node to its id
+                        const NLabel = d3.map(nodes, nodeLabel).map(intern); //map a node to its label
+                        const NGender = d3.map(nodes, nodeGender).map(intern); //map a node to its gender
+                        const NC = d3.map(nodes, nodeChapter).map(intern); //map a node to its first appearance chapter
 
-                        const LF = d3.map(links, linkIsFamily).map(intern);
-                        const LH = d3.map(links, linkHostilityLevel).map(intern);
-                        const LA = d3.map(links, linkAction).map(intern);
+                        const LF = d3.map(links, linkIsFamily).map(intern); //map a link to its family
+                        const LH = d3.map(links, linkHostilityLevel).map(intern); //map a link to its hostility level
+                        const LA = d3.map(links, linkAction).map(intern); //map a link to the action that it represents
+                        const LI = d3.map(links, linkoccurrency).map(intern); //map a link to its index
 
-                        const LS = d3.map(links, linkSource).map(intern);
+                        const LS = d3.map(links, linkSource).map(intern); //map a link to its
                         const LT = d3.map(links, linkTarget).map(intern);
-                        const LD = d3.map(links, linkDistance).map(intern);
                         const LC = d3.map(links, linkChapter).map(intern);
                         if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
-                        const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
                         const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
-                        const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, l => linkStrokeWidth(l));
 
                         //const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
                         const FD = d3.map(family, familyDistance).map(intern);
@@ -699,15 +700,12 @@ function init() {
                         // Replace the input nodes and links with mutable objects for the simulation.
 
                         var nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
-                        var linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i]]));
+                        var linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i], LI[i]]));
                         var familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
                         var nodesInChapter = selectNodesInChapter(nodesInChapter);
                         var linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
                         var familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
-                        var familyLinkInChapter = sortLinks(familyLinkInChapter);
-
-
 
                         // Compute default domains.
                         if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
@@ -717,7 +715,7 @@ function init() {
 
                         // Construct the forces.
                         const forceNode = d3.forceManyBody();
-                        const forceLink = d3.forceLink(linksInChapter).id(({ index: i }) => nodesInChapter[i].id);
+                        const forceLink = d3.forceLink(linksInChapter).id((l => nodesInChapter[l.index].id));
                         const forceFamilyLink = d3.forceLink(familyLinkInChapter).id(({ index: i }) => nodesInChapter[i].id).distance(5).strength(0.05);
                         if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
                         if (linkStrength !== undefined) {
@@ -744,8 +742,8 @@ function init() {
                             .attr("stroke", l => defineLinksColor(l))
                             .attr("stroke-width", function (d) {
                                 if (parseInt(d.chapter) == chapterNumber)
-                                    return 8;
-                                else return 3;
+                                    return 3;
+                                else return 1;
                             })
                             .attr("stroke-opacity", function (d) {
                                 if (parseInt(d.chapter) == chapterNumber)
@@ -847,7 +845,6 @@ function init() {
                         }
 
                         function ticked() {
-
                             link.attr("d", d => positionLink(d, mLinkNum))
                                 .attr("hostilityLevel", function (d) {
                                     return d.hostilityLevel;
@@ -880,9 +877,8 @@ function init() {
                     var nodes = result[0];
                     var links = result[1];
                     var family = result[2];
-                    
-                    sortLinks(links);
-                    setLinkIndexAndNum(links);
+                    links = sortLinks(links);
+                    links = links.map(l => setLinkoccurrencyAndNumIterative(l));
 
                     ForceGraph({ nodes, links, family }, {
                         nodeId: d => d.id,
