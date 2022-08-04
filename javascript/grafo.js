@@ -34,7 +34,7 @@ function init() {
                      */
 
 
-                    function drawGraphUsageGuide(){
+                    function drawGraphUsageGuide() {
                         var howToInteractWithGraph = d3.select("#graph").append("g").attr("id", "howToInteractWithGraph");
                         howToInteractWithGraph.append("rect")
                             .attr("class", "options")
@@ -350,96 +350,96 @@ function init() {
                         return temp;
                     }
 
-                    function openNodeInfos(d){
+                    function openNodeInfos(d) {
                         var svgNodeInfo = d3.select("#graph")
-                                    .append("svg")
-                                    .attr("id", "svgNodeInfo")
-                                    .attr("width", 1000)
-                                    .attr("height", 250)
-                                    .attr("y", 350);
-                                svgNodeInfo.append("rect")
-                                    .attr("class", "info")
-                                    .attr("id", "nodeInfo")
-                                    .attr("x", "7%")
-                                    .attr("width", 400)
-                                    .attr("height", 300)
-                                    .style("fill", "gray");
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("Name: ")
-                                    .attr("x", "8%")
-                                    .attr("y", "10%")
-                                    .style("font-size", "13px")
-                                    .style("font-weight", 700)
-                                    .append("tspan")
-                                    .text(d.srcElement.__data__.label)
-                                    .style("font-weight", 300);
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("ID: ")
-                                    .style("font-weight", 700)
-                                    .attr("x", "8%")
-                                    .attr("y", "20%")
-                                    .style("font-size", "13px")
-                                    .append("tspan")
-                                    .text(d.srcElement.__data__.id)
-                                    .style("font-weight", 300);
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("Gender: ")
-                                    .attr("x", "8%")
-                                    .attr("y", "30%")
-                                    .style("font-size", "13px")
-                                    .style("font-weight", 700)
-                                    .append("tspan")
-                                    .text(d.srcElement.__data__.gender)
-                                    .style("font-weight", 300);
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text(() => {
-                                        if (d.srcElement.__data__.chapter != "")
-                                            return "First appearance: ";
-                                    })
-                                    .attr("x", "8%")
-                                    .attr("y", "40%")
-                                    .style("font-size", "13px")
-                                    .style("font-weight", 700)
-                                    .append("tspan")
-                                    .text(function () {
-                                        if (d.srcElement.__data__.chapter != "")
-                                            return "chapter " + d.srcElement.__data__.chapter;
-                                    })
-                                    .style("font-weight", 300);
-                                svgNodeInfo.append("image")
-                                    .attr("class", "info")
-                                    .attr('x', "8%")
-                                    .attr('y', "50%")
-                                    .attr('width', 120)
-                                    .attr('height', 120)
-                                    .attr('href', 'assets/' + d.srcElement.__data__.id + '.jpeg')
-                                svgNodeInfo.append("rect")
-                                    .attr("class", "button")
-                                    .attr("id", "resetButton")
-                                    .attr("x", "30%")
-                                    .attr("y", "60%")
-                                    .attr("width", 40)
-                                    .attr("height", 30)
-                                    .style("fill", "white")
-                                    .on("click", reset);
-                                svgNodeInfo.append("text")
-                                    .attr("class", "info")
-                                    .text("Close")
-                                    .attr("x", "32%")
-                                    .attr("y", "70%")
-                                    .style("font-size", "13px");
+                            .append("svg")
+                            .attr("id", "svgNodeInfo")
+                            .attr("width", 1000)
+                            .attr("height", 250)
+                            .attr("y", 350);
+                        svgNodeInfo.append("rect")
+                            .attr("class", "info")
+                            .attr("id", "nodeInfo")
+                            .attr("x", "7%")
+                            .attr("width", 400)
+                            .attr("height", 300)
+                            .style("fill", "gray");
+                        svgNodeInfo.append("text")
+                            .attr("class", "info")
+                            .text("Name: ")
+                            .attr("x", "8%")
+                            .attr("y", "10%")
+                            .style("font-size", "13px")
+                            .style("font-weight", 700)
+                            .append("tspan")
+                            .text(d.srcElement.__data__.label)
+                            .style("font-weight", 300);
+                        svgNodeInfo.append("text")
+                            .attr("class", "info")
+                            .text("ID: ")
+                            .style("font-weight", 700)
+                            .attr("x", "8%")
+                            .attr("y", "20%")
+                            .style("font-size", "13px")
+                            .append("tspan")
+                            .text(d.srcElement.__data__.id)
+                            .style("font-weight", 300);
+                        svgNodeInfo.append("text")
+                            .attr("class", "info")
+                            .text("Gender: ")
+                            .attr("x", "8%")
+                            .attr("y", "30%")
+                            .style("font-size", "13px")
+                            .style("font-weight", 700)
+                            .append("tspan")
+                            .text(d.srcElement.__data__.gender)
+                            .style("font-weight", 300);
+                        svgNodeInfo.append("text")
+                            .attr("class", "info")
+                            .text(() => {
+                                if (d.srcElement.__data__.chapter != "")
+                                    return "First appearance: ";
+                            })
+                            .attr("x", "8%")
+                            .attr("y", "40%")
+                            .style("font-size", "13px")
+                            .style("font-weight", 700)
+                            .append("tspan")
+                            .text(function () {
+                                if (d.srcElement.__data__.chapter != "")
+                                    return "chapter " + d.srcElement.__data__.chapter;
+                            })
+                            .style("font-weight", 300);
+                        svgNodeInfo.append("image")
+                            .attr("class", "info")
+                            .attr('x', "8%")
+                            .attr('y', "50%")
+                            .attr('width', 120)
+                            .attr('height', 120)
+                            .attr('href', 'assets/' + d.srcElement.__data__.id + '.jpeg')
+                        svgNodeInfo.append("rect")
+                            .attr("class", "button")
+                            .attr("id", "resetButton")
+                            .attr("x", "30%")
+                            .attr("y", "60%")
+                            .attr("width", 40)
+                            .attr("height", 30)
+                            .style("fill", "white")
+                            .on("click", reset);
+                        svgNodeInfo.append("text")
+                            .attr("class", "info")
+                            .text("Close")
+                            .attr("x", "32%")
+                            .attr("y", "70%")
+                            .style("font-size", "13px");
 
-                                svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
+                        svg.style("box-shadow", "0 0 0 1600px rgba(0,0,0,0.65)");
                     }
 
-                    function defineLinksColor(link){
+                    function defineLinksColor(link) {
                         if (link.isFamily == 1)
                             return "transparent"
-                        if (link.chapter < chapterNumber){
+                        if (link.chapter < chapterNumber) {
                             return "#B1B1B1";
                         }
                         if (link.hostilityLevel == 0)
@@ -462,23 +462,23 @@ function init() {
                         var dr = Math.sqrt(dx * dx + dy * dy);
                         // get the total link numbers between source and target node
                         var lTotalLinkNum = mLinkNum[d.source.id + "," + d.target.id] || mLinkNum[d.target.id + "," + d.source.id];
-                        if(lTotalLinkNum > 1){
+                        if (lTotalLinkNum > 1) {
                             // if there are multiple links between these two nodes, we need generate different dr for each path
-                            dr = (dr/(1 + (1/lTotalLinkNum) * (d.occurrency - 1)));
+                            dr = (dr / (1 + (1 / lTotalLinkNum) * (d.occurrency - 1)));
                         }
 
                         // generate svg path
-                        var dToReturn = "M " + d.source.x + "," + d.source.y + 
-                        " A " + dr + " " + dr + " 0 0 1," + d.target.x + " " + d.target.y;
+                        var dToReturn = "M " + d.source.x + "," + d.source.y +
+                            " A " + dr + " " + dr + " 0 0 1," + d.target.x + " " + d.target.y;
 
-                        if(d.target.x == d.source.x && d.target.y == d.source.y){
+                        if (d.target.x == d.source.x && d.target.y == d.source.y) {
                             dToReturn = "M " + d.source.x + "," + d.source.y + " A 100 100 0 0 1," + d.target.x + " " + d.target.y;
                         }
                         return dToReturn;
 
                     }
 
-                    function drawLegend(){
+                    function drawLegend() {
                         // select the svg area
                         var g = d3.select("#graph").append("g").attr("id", "legend");
 
@@ -497,7 +497,7 @@ function init() {
                         g.append("text").attr("x", "11%").attr("y", 200).text("Past chapters action").style("font-size", "13px").attr("alignment-baseline", "middle");
                     }
 
-                    function drawLinkInfos(link){
+                    function drawLinkInfos(link) {
                         var data = link.srcElement.__data__;
                         if (data.chapter == chapterNumber) {
                             var azione = data.action;
@@ -588,13 +588,13 @@ function init() {
                     }
 
                     // sort the links by source, then target
-                    function sortLinks(linksToSort){	
-                        var sortedLinks = linksToSort.sort(function(a,b) {
+                    function sortLinks(linksToSort) {
+                        var sortedLinks = linksToSort.sort(function (a, b) {
                             if (parseInt(a.source) > parseInt(b.source)) { return 1; }
                             else if (parseInt(a.source) < parseInt(b.source)) { return -1; }
-                            else{
+                            else {
                                 if (parseInt(a.target) > parseInt(b.target)) { return 1; }
-                                if (parseInt(a.target) < parseInt(b.target)){ return -1; }
+                                if (parseInt(a.target) < parseInt(b.target)) { return -1; }
                                 else { return 0; }
                             }
                         });
@@ -602,11 +602,10 @@ function init() {
                     }
 
                     //any links with duplicate source and target get an incremented 'linknum'
-                    function setLinkIndexAndNum(links){								
-                        for (var i = 0; i < links.length; i++) 
-                        {
-                            if (i != 0 && links[i].source == links[i-1].source && links[i].target == links[i-1].target) {
-                                links[i].occurrency = links[i-1].occurrency + 1;
+                    function setLinkIndexAndNum(links) {
+                        for (var i = 0; i < links.length; i++) {
+                            if (i != 0 && links[i].source == links[i - 1].source && links[i].target == links[i - 1].target) {
+                                links[i].occurrency = links[i - 1].occurrency + 1;
                             }
                             else {
                                 links[i].occurrency = 1;
@@ -617,7 +616,7 @@ function init() {
                     }
 
                     //any links with duplicate source and target get an incremented 'linknum'
-                    function setLinkoccurrencyAndNumIterative(l){
+                    function setLinkoccurrencyAndNumIterative(l) {
                         if (!isNaN(mLinkNum[l.source + "," + l.target])) {
                             l.occurrency = mLinkNum[l.source + "," + l.target] + 1;
                         }
@@ -629,51 +628,34 @@ function init() {
                         return l;
                     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     function ForceGraph({ nodes, links, family }, {
-                            nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
-                            nodeLabel = d => d.label,
-                            nodeGender = d => d.gender,
-                            nodeGroup, // given d in nodes, returns an (ordinal) value for color
-                            nodeGroups, // an array of ordinal values representing the node groups
-                            nodeTitle = d => d.label, // given d in nodes, a title string
-                            nodeStrokeOpacity = 1, // node stroke opacity
-                            nodeRadius = 10, // node radius, in pixels
-                            nodeStrength,
-                            nodeChapter = ({ chapter }) => chapter,
-                            linkSource = ({ source }) => source, // given d in links, returns a node identifier string
-                            linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
-                            linkoccurrency = ({ occurrency }) => occurrency,
-                            linkDistance = ({ distance }) => distance,
-                            linkStrokeOpacity = (link) => parseInt(link["chapter"]) == chapterNumber ? 1 : 0.2, // link stroke opacity
-                            linkStrokeLinecap = "round", // link stroke linecap
-                            linkStrength,
-                            linkChapter = ({ chapter }) => chapter,
-                            linkIsFamily = ({ isFamily }) => isFamily,
-                            linkHostilityLevel = ({ hostilityLevel }) => hostilityLevel,
-                            linkAction = ({ action }) => action,
-                            colors = d3.schemeTableau10, // an array of color strings, for the node groups
-                            invalidation, // when this promise resolves, stop the simulation
-                            familySource = ({ source }) => source,
-                            familyTarget = ({ target }) => target,
-                            familyDistance = ({ distance }) => distance
-                        } = {}) {
+                        nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
+                        nodeLabel = d => d.label,
+                        nodeGender = d => d.gender,
+                        nodeGroup, // given d in nodes, returns an (ordinal) value for color
+                        nodeGroups, // an array of ordinal values representing the node groups
+                        nodeTitle = d => d.label, // given d in nodes, a title string
+                        nodeStrokeOpacity = 1, // node stroke opacity
+                        nodeRadius = 10, // node radius, in pixels
+                        nodeStrength,
+                        nodeChapter = ({ chapter }) => chapter,
+                        linkSource = ({ source }) => source, // given d in links, returns a node identifier string
+                        linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
+                        linkoccurrency = ({ occurrency }) => occurrency,
+                        linkDistance = ({ distance }) => distance,
+                        linkStrokeOpacity = (link) => parseInt(link["chapter"]) == chapterNumber ? 1 : 0.2, // link stroke opacity
+                        linkStrokeLinecap = "round", // link stroke linecap
+                        linkStrength,
+                        linkChapter = ({ chapter }) => chapter,
+                        linkIsFamily = ({ isFamily }) => isFamily,
+                        linkHostilityLevel = ({ hostilityLevel }) => hostilityLevel,
+                        linkAction = ({ action }) => action,
+                        colors = d3.schemeTableau10, // an array of color strings, for the node groups
+                        invalidation, // when this promise resolves, stop the simulation
+                        familySource = ({ source }) => source,
+                        familyTarget = ({ target }) => target,
+                        familyDistance = ({ distance }) => distance
+                    } = {}) {
 
                         // Compute values.
                         const N = d3.map(nodes, nodeId).map(intern);    //map a node to its id
@@ -759,8 +741,8 @@ function init() {
 
                         // build a dictionary of nodes that are linked
                         var linkedByIndex = {};
-                        links.forEach(function(d) {
-                            if(d.isFamily == 0 && d.chapter <= chapterNumber){
+                        links.forEach(function (d) {
+                            if (d.isFamily == 0 && d.chapter <= chapterNumber) {
                                 linkedByIndex[d.source + "," + d.target] = 1;
                             }
                         });
@@ -772,25 +754,25 @@ function init() {
 
                         // fade nodes on hover
                         function mouseOver(opacity) {
-                            return function(d) {
+                            return function (d) {
                                 // check all other nodes to see if they're connected
                                 // to this one. if so, keep the opacity at 1, otherwise
                                 // fade
                                 var thisOpacity = 1;
                                 var d = d.srcElement.__data__;
-                                circles.style("stroke-opacity", function(o) {
+                                circles.style("stroke-opacity", function (o) {
                                     thisOpacity = isConnected(d, o) ? 1 : opacity;
                                     return thisOpacity;
                                 });
-                                circles.style("fill-opacity", function(o) {
+                                circles.style("fill-opacity", function (o) {
                                     thisOpacity = isConnected(d, o) ? 1 : opacity;
                                     return thisOpacity;
                                 });
                                 // also style link accordingly
-                                link.style("stroke-opacity", function(o) {
+                                link.style("stroke-opacity", function (o) {
                                     return o.source === d || o.target === d ? 1 : opacity;
                                 });
-                                link.style("stroke", function(o){
+                                link.style("stroke", function (o) {
                                     return o.source === d || o.target === d ? defineLinksColor(o) : "transparent";
                                 });
                             };
@@ -802,7 +784,7 @@ function init() {
                             link.style("stroke-opacity", linkStrokeOpacity);
                             link.style("stroke", l => defineLinksColor(l));
                         }
-                    
+
                         var node = svg
                             .append("g")
                             .attr("id", "nodes")
@@ -823,15 +805,15 @@ function init() {
                             })
                             .on("mouseover", mouseOver(0.2))
                             .on("mouseout", mouseOut);
-                            
+
                         var nodeTitle = node.append("title").text(d => d.label);
                         var nodeText = node.append("text")
-                                .attr("dx", 12)
-                                .attr("dy", ".35em")
-                                .text(d => d.label)
-                                .style("stroke", "black")
-                                .style("stroke-width", 0.5)
-                                .style("fill", "gray");
+                            .attr("dx", 12)
+                            .attr("dy", ".35em")
+                            .text(d => d.label)
+                            .style("stroke", "black")
+                            .style("stroke-width", 0.5)
+                            .style("fill", "gray");
 
                         if (invalidation != null) invalidation.then(() => simulation.stop());
 
