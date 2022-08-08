@@ -137,6 +137,10 @@ input[type=range]::-webkit-slider-thumb {
   stroke-width: 1px;
 }
 
+svg path{
+  fill: none;
+}
+
 .node {
   stroke: #000;
   stroke-width: 1px;
