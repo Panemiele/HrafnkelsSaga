@@ -23,7 +23,7 @@
     {"action":"21","action description":"hostility_non-lethal","isFamily":0,"hostilityLevel":2},
     {"action":"22","action description":"hostility_lethal","isFamily":0,"hostilityLevel":3},
     {"action":"23","action description":"conversation_neutral","isFamily":0,"hostilityLevel":1},
-    {"action":"24","action description":"death_neutral","isFamily":0,"hostilityLevel":1},
+    {"action":"24","action description":"death_neutral","isFamily":0,"hostilityLevel":2},
     {"action":"25","action description":"request information","isFamily":0,"hostilityLevel":1},
     {"action":"26","action description":"name giving","isFamily":0,"hostilityLevel":1},
     {"action":"27","action description":"suicide","isFamily":0,"hostilityLevel":3},

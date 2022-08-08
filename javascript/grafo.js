@@ -440,7 +440,7 @@ function init() {
                         if (link.isFamily == 1)
                             return "transparent"
                         if (link.chapter < chapterNumber) {
-                            return "#B1B1B1";
+                            return "#999";
                         }
                         if (link.hostilityLevel == 0)
                             return "green";
@@ -718,7 +718,6 @@ function init() {
 
                         const link = svg.append("g")
                             .attr("class", "links")
-                            .attr("fill", "transparent")
                             .attr("stroke-linecap", linkStrokeLinecap)
                             .selectAll("path")
                             .data(linksInChapter)
