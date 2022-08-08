@@ -482,19 +482,21 @@ function init() {
                         // select the svg area
                         var g = d3.select("#graph").append("g").attr("id", "legend");
 
-                        g.append("rect").attr("x", "7%").attr("y", 60).attr("width", 300).attr("height", 160).style("fill", "#999");
+                        g.append("rect").attr("x", "7%").attr("y", 60).attr("width", 200).attr("height", 205).style("fill", "#999");
                         // Handmade legend
-                        g.append("text").attr("x", "7.5%").attr("y", 100).text("Color -> Hostility level").style("font-size", "25px").style("font-weight", 700).attr("alignment-baseline", "left");
-                        g.append("rect").attr("x", "9%").attr("y", 120).attr("width", 23).attr("height", 7).style("fill", "white");
-                        g.append("rect").attr("x", "9%").attr("y", 140).attr("width", 23).attr("height", 7).style("fill", "green");
-                        g.append("rect").attr("x", "9%").attr("y", 160).attr("width", 23).attr("height", 7).style("fill", "orange");
-                        g.append("rect").attr("x", "9%").attr("y", 180).attr("width", 23).attr("height", 7).style("fill", "red");
-                        g.append("rect").attr("x", "9%").attr("y", 200).attr("width", 23).attr("height", 3).style("fill", "gray");
-                        g.append("text").attr("x", "11%").attr("y", 120).text("Neutral action").style("font-size", "13px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 140).text("Good action").style("font-size", "13px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 160).text("Bad action").style("font-size", "13px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 180).text("Very bad action").style("font-size", "13px").attr("alignment-baseline", "middle");
-                        g.append("text").attr("x", "11%").attr("y", 200).text("Past chapters action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "7.5%").attr("y", 100).text("Legend").style("font-size", "25px").style("font-weight", 700).attr("alignment-baseline", "left");
+                        g.append("rect").attr("x", "8%").attr("y", 120).attr("width", 23).attr("height", 7).style("fill", "white");
+                        g.append("rect").attr("x", "8%").attr("y", 140).attr("width", 23).attr("height", 7).style("fill", "green");
+                        g.append("rect").attr("x", "8%").attr("y", 160).attr("width", 23).attr("height", 7).style("fill", "orange");
+                        g.append("rect").attr("x", "8%").attr("y", 180).attr("width", 23).attr("height", 7).style("fill", "red");
+                        g.append("rect").attr("x", "8%").attr("y", 200).attr("width", 23).attr("height", 3).style("fill", "gray");
+                        g.append("text").attr("x", "10%").attr("y", 120).text("Neutral action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "10%").attr("y", 140).text("Good action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "10%").attr("y", 160).text("Bad action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "10%").attr("y", 180).text("Very bad action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "10%").attr("y", 200).text("Past chapters action").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "7.5%").attr("y", 230).text("Nodes clusters represent ").style("font-size", "13px").attr("alignment-baseline", "middle");
+                        g.append("text").attr("x", "7.5%").attr("y", 245).text("families of characters").style("font-size", "13px").attr("alignment-baseline", "middle");
                     }
 
                     function drawLinkInfos(link) {
