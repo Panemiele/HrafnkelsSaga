@@ -11,7 +11,9 @@
 </head>
 
 <body>
-    <p>The Hrafnkels saga is one of the Icelandic sagas that tells of the adventures of captains and peasants in eastern Iceland in the 10th century. The Hrafnkel Saga network describes the relationships between the protagonists of the saga through an undirected graph. Each node represents a character of the saga, while the arcs represent the actions they perform in each chapter of the narrative. Using the slider below it is possible to scroll through the various chapters</p>
+    <div id="descriptionDiv">
+        <p id="description">The Hrafnkels saga is one of the Icelandic sagas that tells of the adventures of captains and peasants in eastern Iceland in the 10th century. The Hrafnkel Saga network describes the relationships between the protagonists of the saga through an undirected graph. Each node represents a character of the saga, while the arcs represent the actions they perform in each chapter of the narrative. Using the slider below it is possible to scroll through the various chapters.</p>
+    </div>
     <div id="divForInput">
         <label class="sliderBar">Select the chapter
             <div class="range">
@@ -39,7 +41,7 @@
         </label>
     </div>
 
-    <div id="graphDiv" box-shadow="-1px 1px 5px 9px rgba(0,0,0,0.75)" width="90%">
+    <div id="graphDiv" width="90%">
         <svg id="graph"></svg>
     </div>
     <script src="https://d3js.org/d3.v7.min.js"></script>

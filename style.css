@@ -158,6 +158,21 @@ svg path{
   background: gray;
 }
 
+#description{
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  -webkit-box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
+  -moz-box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
+  box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
+}
+
+#descriptionDiv{
+  width: 80%;
+  padding-left: 10%;
+}
+
 #graphDiv{
   -webkit-box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
   -moz-box-shadow: -1px 1px 5px 9px rgba(0,0,0,0.75);
