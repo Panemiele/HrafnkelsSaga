@@ -3,6 +3,7 @@ var nodeRadius = 20;
 var width = "100%";
 var height = 700;
 var chapterNumber = parseInt(document.querySelector('#rangeField').value);
+var previousChapter = chapterNumber;
 var xCenter = 700,
     yCenter = 300;
 
@@ -10,6 +11,11 @@ var xCenter = 700,
 var svg = d3.select("#graph")
     .attr("width", width)
     .attr("height", height);
+
+var nodesInChapter = [];
+var eventTransform;
+var simulation;
+var familiesCollection;
 
 function init() {
     d3.json('./dataset/characters_nodes.json').then(function (nodesData) {
@@ -33,6 +39,10 @@ function init() {
                      *              - an Array for all the edges (without actions indexes)
                      */
 
+
+                    function intern(value) {
+                        return value !== null && typeof value === "object" ? value.valueOf() : value;
+                    }
 
                     function drawGraphUsageGuide() {
                         var howToInteractWithGraph = d3.select("#graph").append("g").attr("id", "howToInteractWithGraph");
@@ -115,11 +125,21 @@ function init() {
 
 
                     function reset() {
+                        resetLegend();
+                        resetUsageGuide();
                         svg.selectAll(".info").remove();
                         svg.selectAll("#svgNodeInfo").remove();
                         d3.select(this).remove();
                         svg.style("box-shadow", "0 0 0 0px rgba(0,0,0,0.65)");
+                    }
+
+                    function resetUsageGuide() {
+                        d3.select("#howToInteractWithGraph").remove();
                         drawGraphUsageGuide();
+                    }
+
+                    function resetLegend(){
+                        d3.select("#legend").remove();
                         drawLegend();
                     }
 
@@ -137,7 +157,7 @@ function init() {
                             if (parental_actions.indexOf(general_actions["action"]) != -1) {
 
                                 if (families.length == 0) {
-                                    family = [];
+                                    var family = [];
                                     family.push(general_actions["source"]);
                                     family.push(general_actions["target"]);
                                     families.push(family);
@@ -230,7 +250,7 @@ function init() {
                         var characterEdges = [];
                         var familyEdges = [];
 
-                        var families = isFamily(actions);
+                        familiesCollection = isFamily(actions);
 
                         nodesData.forEach(function (character) {
                             genderCodes.forEach(function (gender) {
@@ -254,7 +274,7 @@ function init() {
                                         "target": edge["target"],
                                         "action": action["action description"],
                                         "chapter": edge["chapter"],
-                                        "distance": setDistance(edge["source"], edge["target"], families),
+                                        "distance": setDistance(edge["source"], edge["target"], familiesCollection),
                                         "page": edge["page"],
                                         "isFamily": action["isFamily"],
                                         "hostilityLevel": action["hostilityLevel"]
@@ -264,7 +284,7 @@ function init() {
                             })
                         })
 
-                        var familyEdges = createclique(families);
+                        var familyEdges = createclique(familiesCollection);
 
                         result[0] = characterNodes;
                         result[1] = characterEdges;
@@ -272,34 +292,26 @@ function init() {
                         return result;
                     }
 
-                    function updateGraph() {
-                        reset();
-                        chapterNumber = parseInt(document.querySelector('#rangeField').value);
-                        svg.selectAll(".nodes").remove();
-                        svg.selectAll(".links").remove();
-                        svg.select("#legend").remove();
-                        svg.select("#howToInteractWithGraph").remove();
-                        links = sortLinks(links);
-                        links = links.map(l => setLinkoccurrencyAndNumIterative(l));
-                        ForceGraph({ nodes, links, family }, {
-                            nodeId: d => d.id,
-                            nodeGroup: d => d.group,
-                            nodeTitle: d => `${d.label}`,
-                            width,
-                            height: 600,
-                        });
-                        drawLegend();
-                        drawGraphUsageGuide();
+                    function isNodeContained(node, arrayOfNodes){
+                        if(arrayOfNodes.length == 0){
+                            return false;
+                        }
+                        var filteredLength = arrayOfNodes.filter(d => d == node).length;
+                        return filteredLength > 0;
                     }
 
-                    function selectNodesInChapter(nodesInChapter) {
+                    function selectNodesInChapter(nic, nodesInChapter) {
                         var temp = []
-                        for (var i in nodesInChapter) {
-                            var nodeChapter = nodesInChapter[i][1];
-                            if (nodeChapter == null || nodeChapter <= chapterNumber) {
-                                temp.push({ id: nodesInChapter[i][0], chapter: nodesInChapter[i][1], label: nodesInChapter[i][2], gender: nodesInChapter[i][3] });
+                        temp.concat(nodesInChapter);
+                        for (var i in nic) {
+                            if(!isNodeContained(i, temp)){
+                                var nodeChapter = nic[i][1];
+                                if (nodeChapter == chapterNumber) {
+                                    temp.push({ id: nic[i][0], chapter: nic[i][1], label: nic[i][2], gender: nic[i][3] });
+                                }
                             }
                         }
+
                         return temp;
                     }
 
@@ -604,21 +616,7 @@ function init() {
                     }
 
                     //any links with duplicate source and target get an incremented 'linknum'
-                    function setLinkIndexAndNum(links) {
-                        for (var i = 0; i < links.length; i++) {
-                            if (i != 0 && links[i].source == links[i - 1].source && links[i].target == links[i - 1].target) {
-                                links[i].occurrency = links[i - 1].occurrency + 1;
-                            }
-                            else {
-                                links[i].occurrency = 1;
-                            }
-                            // save the total number of links between two node
-                            mLinkNum[links[i].source + "," + links[i].target] = links[i].occurrency;
-                        }
-                    }
-
-                    //any links with duplicate source and target get an incremented 'linknum'
-                    function setLinkoccurrencyAndNumIterative(l) {
+                    function setLinkOccurrencyAndNumIterative(l) {
                         if (!isNaN(mLinkNum[l.source + "," + l.target])) {
                             l.occurrency = mLinkNum[l.source + "," + l.target] + 1;
                         }
@@ -630,7 +628,69 @@ function init() {
                         return l;
                     }
 
-                    function ForceGraph({ nodes, links, family }, {
+                    function createNodesInChapter(nodes, idFunct, labelFunct, genderFunct, chapterFunct, titleFunct, nodesInChapter){
+                        // Compute values.
+                        const N = d3.map(nodes, idFunct).map(intern);    //map a node to its id
+                        const NLabel = d3.map(nodes, labelFunct).map(intern); //map a node to its label
+                        const NGender = d3.map(nodes, genderFunct).map(intern); //map a node to its gender
+                        const NC = d3.map(nodes, chapterFunct).map(intern); //map a node to its first appearance chapter
+                        if (titleFunct === undefined) titleFunct = (_, i) => N[i];
+                        var nic = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
+                        return selectNodesInChapter(nic, nodesInChapter);
+                    }
+
+                    function createLinksInChapter(links, nodesInChapter, isFamilyFunct, hostilityFunct, actionFunct, occurencyFunct, sourceFunct, targetFunct, chapterFunct){
+                        const LF = d3.map(links, isFamilyFunct).map(intern); //map a link to its family
+                        const LH = d3.map(links, hostilityFunct).map(intern); //map a link to its hostility level
+                        const LA = d3.map(links, actionFunct).map(intern); //map a link to the action that it represents
+                        const LI = d3.map(links, occurencyFunct).map(intern); //map a link to its index
+                        const LS = d3.map(links, sourceFunct).map(intern); //map a link to its
+                        const LT = d3.map(links, targetFunct).map(intern);
+                        const LC = d3.map(links, chapterFunct).map(intern);
+                        var linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i], LI[i]]));
+                        return selectLinksInChapter(linksInChapter, nodesInChapter)
+                    }
+
+                    function createFamilyLinksInChapter(family, nodesInChapter, sourceFunct, targetFunct){
+                        //const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
+                        const FS = d3.map(family, sourceFunct).map(intern);
+                        const FT = d3.map(family, targetFunct).map(intern);
+                        var familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
+                        return selectFamilyLinksInChapter(familyLinks, nodesInChapter);
+                    }
+
+                    function isSameFamily(families, nodeA, nodeB){
+                        return parseInt(found_family(families, nodeA.id)) == parseInt(found_family(families, nodeB.id));
+                    }
+
+                    function isolate(force, nodeA, nodeB) {
+                        let initialize = force.initialize;
+                        force.initialize = function() { initialize.call(force, [nodeA, nodeB]); };
+                        return force;
+                    }
+
+                    function applyForcesToPairsOfNodes(nodesInChapter, familiesCollection){
+                        for(let i = 0; i < nodesInChapter.length - 1; i++){
+                            for(let j = i + 1; j < nodesInChapter.length; j++){
+
+                            var force;
+                            if(isSameFamily(familiesCollection, nodesInChapter[i], nodesInChapter[j])){
+                                // console.log("so daa stessa famia")
+                                force = d3.forceManyBody().strength(-5).initialize;
+                            } else{
+                                // console.log("NUN SO daa stessa famia")
+                                force = d3.forceManyBody().strength(-20).initialize;
+                            }
+                            simulation
+                                .force(
+                                    nodesInChapter[i].id.concat(nodesInChapter[j].id),
+                                    isolate(force, nodesInChapter[i], nodesInChapter[j])
+                                );
+                            }
+                        }
+                    }
+
+                    function ForceGraph({ nodes, links, families }, {
                         nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
                         nodeLabel = d => d.label,
                         nodeGender = d => d.gender,
@@ -643,8 +703,7 @@ function init() {
                         nodeChapter = ({ chapter }) => chapter,
                         linkSource = ({ source }) => source, // given d in links, returns a node identifier string
                         linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
-                        linkoccurrency = ({ occurrency }) => occurrency,
-                        linkDistance = ({ distance }) => distance,
+                        linkOccurrency = ({ occurrency }) => occurrency,
                         linkStrokeOpacity = (link) => parseInt(link["chapter"]) == chapterNumber ? 1 : 0.2, // link stroke opacity
                         linkStrokeLinecap = "round", // link stroke linecap
                         linkStrength,
@@ -656,40 +715,24 @@ function init() {
                         invalidation, // when this promise resolves, stop the simulation
                         familySource = ({ source }) => source,
                         familyTarget = ({ target }) => target,
-                        familyDistance = ({ distance }) => distance
                     } = {}) {
 
-                        // Compute values.
-                        const N = d3.map(nodes, nodeId).map(intern);    //map a node to its id
-                        const NLabel = d3.map(nodes, nodeLabel).map(intern); //map a node to its label
-                        const NGender = d3.map(nodes, nodeGender).map(intern); //map a node to its gender
-                        const NC = d3.map(nodes, nodeChapter).map(intern); //map a node to its first appearance chapter
-
-                        const LF = d3.map(links, linkIsFamily).map(intern); //map a link to its family
-                        const LH = d3.map(links, linkHostilityLevel).map(intern); //map a link to its hostility level
-                        const LA = d3.map(links, linkAction).map(intern); //map a link to the action that it represents
-                        const LI = d3.map(links, linkoccurrency).map(intern); //map a link to its index
-
-                        const LS = d3.map(links, linkSource).map(intern); //map a link to its
-                        const LT = d3.map(links, linkTarget).map(intern);
-                        const LC = d3.map(links, linkChapter).map(intern);
-                        if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
-                        const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
-
-                        //const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
-                        const FD = d3.map(family, familyDistance).map(intern);
-                        const FS = d3.map(family, familySource).map(intern);
-                        const FT = d3.map(family, familyTarget).map(intern);
-
-                        // Replace the input nodes and links with mutable objects for the simulation.
-
-                        var nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
-                        var linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i], LI[i]]));
-                        var familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
-
-                        var nodesInChapter = selectNodesInChapter(nodesInChapter);
-                        var linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
-                        var familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
+                        var newNodesToAdd = [];
+                        var forceDirection = 1;
+                        if(previousChapter > chapterNumber){
+                            forceDirection = -1;
+                            console.log("nodesInChapter");
+                            nodesInChapter = nodesInChapter.filter(d => d.chapter < previousChapter);
+                            console.log(nodesInChapter);
+                        } else {
+                            newNodesToAdd = createNodesInChapter(nodes, nodeId, nodeLabel, nodeGender, nodeChapter, nodeTitle, nodesInChapter);
+                            console.log(newNodesToAdd);
+                            nodesInChapter = nodesInChapter.concat(newNodesToAdd);
+                            console.log(nodesInChapter);
+                        }
+                        const G = nodeGroup == null ? null : d3.map(nodesInChapter, nodeGroup).map(intern);
+                        var linksInChapter = createLinksInChapter(links, nodesInChapter, linkIsFamily, linkHostilityLevel, linkAction, linkOccurrency, linkSource, linkTarget, linkChapter);
+                        var familyLinkInChapter = createFamilyLinksInChapter(families, nodesInChapter, familySource, familyTarget);
 
                         // Compute default domains.
                         if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
@@ -697,17 +740,12 @@ function init() {
                         // Construct the scales.
                         const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
 
+                        var strength = -20;
                         // Construct the forces.
-                        const forceNode = d3.forceManyBody();
-                        const forceLink = d3.forceLink(linksInChapter).id((l => nodesInChapter[l.index].id));
-                        const forceFamilyLink = d3.forceLink(familyLinkInChapter).id(({ index: i }) => nodesInChapter[i].id).distance(5).strength(0.05);
-                        if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
-                        if (linkStrength !== undefined) {
-                            forceLink.strength(linkStrength);
-                            forceFamilyLink.strength(linkStrength);
-                        }
-
-                        const simulation = d3.forceSimulation(nodesInChapter)
+                        const forceNode = d3.forceManyBody().strength((strength/chapterNumber)*forceDirection);
+                        const forceLink = d3.forceLink(linksInChapter).id((l => nodesInChapter[l.index].id)).distance(60).strength(0.2);
+                        const forceFamilyLink = d3.forceLink(familyLinkInChapter).id(({ index: i }) => nodesInChapter[i].id).distance(45).strength(1);
+                        simulation = d3.forceSimulation(nodesInChapter)
                             .force("link", forceLink)
                             .force("link", forceFamilyLink)
                             .force("charge", forceNode)
@@ -731,8 +769,14 @@ function init() {
                             .attr("stroke-opacity", function (d) {
                                 if (parseInt(d.chapter) == chapterNumber)
                                     return 1;
-                                else return 0.2;
+                                else{
+                                    if(parseInt(d.chapter) < chapterNumber)
+                                        return 0.2;
+                                    else
+                                        return 0;
+                                }
                             })
+                            .attr("transform", eventTransform)
                             .on("mouseover", d => {
                                 drawLinkInfos(d);
                             })
@@ -794,8 +838,18 @@ function init() {
                             .attr("height", height)
                             .selectAll(".node")
                             .data(nodesInChapter)
-                            .join("g")
-                            .attr("class", "node");
+                            .join(function(enter) {
+                                return enter.append("g");
+                              },
+                              function(update) {
+                                update.remove();
+                                return update.append("g");
+                              },
+                              function(exit){
+                                return exit.remove();
+                              })
+                            .attr("class", "node")
+                            .attr("transform", eventTransform);
 
                         var circles = node.append("circle")
                             .attr("id", d => "node" + d.id)
@@ -823,10 +877,6 @@ function init() {
                             .scaleExtent([1 / 2, 8])
                             .on("zoom", zoomGraph));
 
-                        function intern(value) {
-                            return value !== null && typeof value === "object" ? value.valueOf() : value;
-                        }
-
                         function ticked() {
                             link.attr("d", d => positionLink(d, mLinkNum))
                                 .attr("hostilityLevel", function (d) {
@@ -837,18 +887,46 @@ function init() {
                                 .attr("cy", d => d.y);
                             nodeText.attr("x", d => d.x)
                                 .attr("y", d => d.y);
+                            
+                            applyForcesToPairsOfNodes(nodesInChapter, familiesCollection);
+
                         }
 
                         function zoomGraph(event) {
-                            node.attr("transform", event.transform);
-                            link.attr("transform", event.transform);
-                        }
-
-                        function displayNames(d) {
-                            svg.append("rect").attr("x", "5.7%").attr("y", 300).attr("width", 400).attr("height", 200).style("fill", "white")
+                            eventTransform = event.transform;
+                            node.attr("transform", eventTransform);
+                            link.attr("transform", eventTransform);
                         }
 
                         return Object.assign(svg.node(), { scales: { color } });
+                    }
+
+
+
+
+
+
+
+
+
+
+                    function updateGraph() {
+                        svg.selectAll(".nodes").remove();
+                        svg.selectAll(".links").remove();
+                        reset();
+                        previousChapter = chapterNumber;
+                        chapterNumber = parseInt(document.querySelector('#rangeField').value);
+                        links = sortLinks(links);
+                        links = links.map(l => setLinkOccurrencyAndNumIterative(l));
+                        ForceGraph({ nodes, links, families }, {
+                            nodeId: d => d.id,
+                            nodeGroup: d => d.group,
+                            nodeTitle: d => `${d.label}`,
+                            width,
+                            height: 600,
+                        });
+                        resetLegend();
+                        resetUsageGuide();
                     }
 
                     //--------------------------------------------------------------------------------------------
@@ -859,11 +937,11 @@ function init() {
                     var result = createGraphTopologyArray(nodesData, edgesData, actionsData, gendersData);
                     var nodes = result[0];
                     var links = result[1];
-                    var family = result[2];
+                    var families = result[2];
                     links = sortLinks(links);
-                    links = links.map(l => setLinkoccurrencyAndNumIterative(l));
+                    links = links.map(l => setLinkOccurrencyAndNumIterative(l));
 
-                    ForceGraph({ nodes, links, family }, {
+                    ForceGraph({ nodes, links, families }, {
                         nodeId: d => d.id,
                         nodeGroup: d => d.group,
                         nodeTitle: d => `${d.label}`,
