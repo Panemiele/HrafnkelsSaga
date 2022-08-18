@@ -683,11 +683,11 @@ function init() {
 
                         // Replace the input nodes and links with mutable objects for the simulation.
 
-                        var nodesInChapter = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
+                        var allNodes = d3.map(nodes, (_, i) => ([N[i], NC[i], NLabel[i], NGender[i]]));
                         var linksInChapter = d3.map(links, (_, i) => ([LS[i], LT[i], LC[i], LA[i], LH[i], LF[i], LI[i]]));
                         var familyLinks = d3.map(family, (_, i) => ([FS[i], FT[i]]));
 
-                        var nodesInChapter = selectNodesInChapter(nodesInChapter);
+                        var nodesInChapter = selectNodesInChapter(allNodes);
                         var linksInChapter = selectLinksInChapter(linksInChapter, nodesInChapter);
                         var familyLinkInChapter = selectFamilyLinksInChapter(familyLinks, nodesInChapter);
 
