@@ -296,9 +296,9 @@ function init() {
                         var temp = []
                         for (var i in nodesInChapter) {
                             var nodeChapter = nodesInChapter[i][1];
-                            if (nodeChapter == null || nodeChapter <= chapterNumber) {
-                                temp.push({ id: nodesInChapter[i][0], chapter: nodesInChapter[i][1], label: nodesInChapter[i][2], gender: nodesInChapter[i][3] });
-                            }
+                            // if (nodeChapter == null || nodeChapter <= chapterNumber) {
+                            temp.push({ id: nodesInChapter[i][0], chapter: nodesInChapter[i][1], label: nodesInChapter[i][2], gender: nodesInChapter[i][3] });
+                            // }
                         }
                         return temp;
                     }
@@ -799,7 +799,12 @@ function init() {
 
                         var circles = node.append("circle")
                             .attr("id", d => "node" + d.id)
-                            .attr("r", nodeRadius)
+                            .attr("r", function (d) {
+                                if (d.chapter <= chapterNumber)
+                                    return nodeRadius;
+                                else
+                                    return 0;
+                            })
                             .on("click", d => {
                                 reset();
                                 openNodeInfos(d);
@@ -811,7 +816,11 @@ function init() {
                         var nodeText = node.append("text")
                             .attr("dx", 12)
                             .attr("dy", ".35em")
-                            .text(d => d.label)
+                            .text(function (d) { //d => d.label
+                                if (d.chapter <= chapterNumber)
+                                    return d.label
+                                else return ""
+                            })
                             .style("stroke", "black")
                             .style("stroke-width", 0.5)
                             .style("fill", "gray");
