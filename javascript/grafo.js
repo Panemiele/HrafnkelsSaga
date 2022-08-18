@@ -275,7 +275,7 @@ function init() {
                     function updateGraph() {
                         reset();
                         chapterNumber = parseInt(document.querySelector('#rangeField').value);
-                        svg.selectAll(".nodes").remove();
+                        svg.selectAll(".out").remove();
                         svg.selectAll(".links").remove();
                         svg.select("#legend").remove();
                         svg.select("#howToInteractWithGraph").remove();
@@ -795,7 +795,11 @@ function init() {
                             .selectAll(".node")
                             .data(nodesInChapter)
                             .join("g")
-                            .attr("class", "node");
+                            .attr("class", function (d) {
+                                if (d.chapter <= chapterNumber)
+                                    return "in"
+                                else return "out"
+                            });
 
                         var circles = node.append("circle")
                             .attr("id", d => "node" + d.id)
