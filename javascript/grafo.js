@@ -200,6 +200,7 @@ function init() {
 
                     function found_family(families, id_character) {
                         for (var i in families) {
+                            console.log(families);
                             if (families[i].indexOf(id_character) != -1) {
                                 return i;
                             }
@@ -659,12 +660,20 @@ function init() {
                         return selectFamilyLinksInChapter(familyLinks, nodesInChapter);
                     }
 
-                    function isSameFamily(families, nodeA, nodeB){
-                        return parseInt(found_family(families, nodeA.id)) == parseInt(found_family(families, nodeB.id));
+                    function isSameFamily(nodeA, nodeB){
+                        for(var i in familiesCollection){
+                            if(i.includes(nodeA.id) && i.includes(nodeB.id))
+                                return true;
+                        }
+                        return false;
                     }
 
                     function isolate(force, nodeA, nodeB) {
                         let initialize = force.initialize;
+                        console.log("force");
+                        console.log(force);
+                        console.log("initialize");
+                        console.log(initialize);
                         force.initialize = function() { initialize.call(force, [nodeA, nodeB]); };
                         return force;
                     }
@@ -674,7 +683,7 @@ function init() {
                             for(let j = i + 1; j < nodesInChapter.length; j++){
 
                             var force;
-                            if(isSameFamily(familiesCollection, nodesInChapter[i], nodesInChapter[j])){
+                            if(isSameFamily(nodesInChapter[i], nodesInChapter[j])){
                                 // console.log("so daa stessa famia")
                                 force = d3.forceManyBody().strength(-5).initialize;
                             } else{
@@ -720,15 +729,11 @@ function init() {
                         var newNodesToAdd = [];
                         var forceDirection = 1;
                         if(previousChapter > chapterNumber){
-                            forceDirection = -1;
-                            console.log("nodesInChapter");
+                            forceDirection = -0.6;
                             nodesInChapter = nodesInChapter.filter(d => d.chapter < previousChapter);
-                            console.log(nodesInChapter);
                         } else {
                             newNodesToAdd = createNodesInChapter(nodes, nodeId, nodeLabel, nodeGender, nodeChapter, nodeTitle, nodesInChapter);
-                            console.log(newNodesToAdd);
                             nodesInChapter = nodesInChapter.concat(newNodesToAdd);
-                            console.log(nodesInChapter);
                         }
                         const G = nodeGroup == null ? null : d3.map(nodesInChapter, nodeGroup).map(intern);
                         var linksInChapter = createLinksInChapter(links, nodesInChapter, linkIsFamily, linkHostilityLevel, linkAction, linkOccurrency, linkSource, linkTarget, linkChapter);
@@ -740,19 +745,18 @@ function init() {
                         // Construct the scales.
                         const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
 
-                        var strength = -20;
+                        var strength = -15;
                         // Construct the forces.
                         const forceNode = d3.forceManyBody().strength((strength/chapterNumber)*forceDirection);
-                        const forceLink = d3.forceLink(linksInChapter).id((l => nodesInChapter[l.index].id)).distance(60).strength(0.2);
+                        const forceLink = d3.forceLink(linksInChapter).id((l => nodesInChapter[l.index].id)).distance(60).strength(1);
                         const forceFamilyLink = d3.forceLink(familyLinkInChapter).id(({ index: i }) => nodesInChapter[i].id).distance(45).strength(1);
-                        simulation = d3.forceSimulation(nodesInChapter)
+                        simulation = d3.forceSimulation(newNodesToAdd)
+                        .velocityDecay(0.3)
                             .force("link", forceLink)
                             .force("link", forceFamilyLink)
                             .force("charge", forceNode)
                             .force("center", d3.forceCenter(xCenter, yCenter))
                             .on("tick", ticked);
-
-                        svg.attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
                         const link = svg.append("g")
                             .attr("class", "links")
@@ -777,6 +781,7 @@ function init() {
                                 }
                             })
                             .attr("transform", eventTransform)
+                            
                             .on("mouseover", d => {
                                 drawLinkInfos(d);
                             })
@@ -888,7 +893,7 @@ function init() {
                             nodeText.attr("x", d => d.x)
                                 .attr("y", d => d.y);
                             
-                            applyForcesToPairsOfNodes(nodesInChapter, familiesCollection);
+                            //applyForcesToPairsOfNodes(nodesInChapter, familiesCollection);
 
                         }
 
