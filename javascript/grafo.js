@@ -3,6 +3,7 @@ var nodeRadius = 20;
 var width = "100%";
 var height = 700;
 var chapterNumber = parseInt(document.querySelector('#rangeField').value);
+var prevChapter=0;
 var xCenter = 700,
     yCenter = 300;
 
@@ -223,6 +224,14 @@ function init() {
                         else return 10;
                     }
 
+                    function findChapter(chapter){
+                      if(chapter=="")
+                        return "1";
+                      else
+                        return chapter;
+
+                    }
+
                     function createGraphTopologyArray(nodesData, edgesData, actions, genderCodes) {
                         var result = [];
 
@@ -239,7 +248,8 @@ function init() {
                                         "id": character["id"],
                                         "label": character["label"],
                                         "gender": gender["gender description"],
-                                        "chapter": character["chapter"],
+                                        //"chapter": character["chapter"],
+                                        "chapter": findChapter(character["chapter"]),
                                         "page": character["page"]
                                     };
                                     characterNodes.push(resolvedCharacter);
@@ -273,6 +283,7 @@ function init() {
                     }
 
                     function updateGraph() {
+                        prevChapter = chapterNumber;
                         reset();
                         chapterNumber = parseInt(document.querySelector('#rangeField').value);
                         svg.selectAll(".out").remove();
@@ -717,6 +728,7 @@ function init() {
                         svg.attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
                         const link = svg.append("g")
+                            .lower()
                             .attr("class", "links")
                             .attr("stroke-linecap", linkStrokeLinecap)
                             .selectAll("path")
@@ -788,13 +800,15 @@ function init() {
 
                         var node = svg
                             .append("g")
-                            .attr("id", "nodes")
                             .attr("class", "nodes")
                             .attr("width", width)
                             .attr("height", height)
                             .selectAll(".node")
                             .data(nodesInChapter)
                             .join("g")
+                            .attr("id", function(d){
+                                return "node"+d.id
+                            })
                             .attr("class", function (d) {
                                 if (d.chapter <= chapterNumber)
                                     return "in"
@@ -803,11 +817,22 @@ function init() {
 
                         var circles = node.append("circle")
                             .attr("id", d => "node" + d.id)
-                            .attr("r", function (d) {
+                            /*.attr("r", function (d) {
                                 if (d.chapter <= chapterNumber)
                                     return nodeRadius;
                                 else
                                     return 0;
+                            })*/
+                            .attr("r", function (d) {
+                                if (prevChapter < chapterNumber){
+                                  if((d.chapter > prevChapter) && (d.chapter <= chapterNumber))
+                                      return nodeRadius;
+                                  else return 0;
+                                }
+                                else if(prevChapter > chapterNumber){
+                                  if(d.chapter > chapterNumber)
+                                    svg.select("#node"+d.id).remove();
+                                }
                             })
                             .on("click", d => {
                                 reset();
@@ -816,14 +841,22 @@ function init() {
                             .on("mouseover", mouseOver(0.2))
                             .on("mouseout", mouseOut);
 
+
                         var nodeTitle = node.append("title").text(d => d.label);
                         var nodeText = node.append("text")
                             .attr("dx", 12)
                             .attr("dy", ".35em")
-                            .text(function (d) { //d => d.label
+                            /*.text(function (d) { //d => d.label
                                 if (d.chapter <= chapterNumber)
                                     return d.label
                                 else return ""
+                            })*/
+                            .text(function (d) { //d => d.label
+                              if (prevChapter < chapterNumber){
+                                if((d.chapter > prevChapter) && (d.chapter <= chapterNumber))
+                                    return d.label;
+                                else return "";
+                              }
                             })
                             .style("stroke", "black")
                             .style("stroke-width", 0.5)
@@ -853,8 +886,8 @@ function init() {
                         }
 
                         function zoomGraph(event) {
-                            node.attr("transform", event.transform);
-                            link.attr("transform", event.transform);
+                            svg.selectAll(".nodes").attr("transform", event.transform);
+                            svg.selectAll(".links").attr("transform", event.transform);
                         }
 
                         function displayNames(d) {
