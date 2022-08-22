@@ -817,12 +817,6 @@ function init() {
 
                         var circles = node.append("circle")
                             .attr("id", d => "node" + d.id)
-                            /*.attr("r", function (d) {
-                                if (d.chapter <= chapterNumber)
-                                    return nodeRadius;
-                                else
-                                    return 0;
-                            })*/
                             .attr("r", function (d) {
                                 if (prevChapter < chapterNumber){
                                   if((d.chapter > prevChapter) && (d.chapter <= chapterNumber))
@@ -846,11 +840,6 @@ function init() {
                         var nodeText = node.append("text")
                             .attr("dx", 12)
                             .attr("dy", ".35em")
-                            /*.text(function (d) { //d => d.label
-                                if (d.chapter <= chapterNumber)
-                                    return d.label
-                                else return ""
-                            })*/
                             .text(function (d) { //d => d.label
                               if (prevChapter < chapterNumber){
                                 if((d.chapter > prevChapter) && (d.chapter <= chapterNumber))
