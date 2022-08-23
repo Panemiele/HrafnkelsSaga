@@ -12,6 +12,9 @@ var svg = d3.select("#graph")
     .attr("width", width)
     .attr("height", height);
 
+var ciao = svg.append("g")
+ciao
+
 function init() {
     d3.json('./dataset/characters_nodes.json').then(function (nodesData) {
         d3.json('./dataset/characters_edges.json').then(function (edgesData) {
@@ -754,6 +757,7 @@ function init() {
 
                         // build a dictionary of nodes that are linked
                         var linkedByIndex = {};
+                        console.log("ciao")
                         links.forEach(function (d) {
                             if (d.isFamily == 0 && d.chapter <= chapterNumber) {
                                 linkedByIndex[d.source + "," + d.target] = 1;
@@ -765,6 +769,23 @@ function init() {
                             return linkedByIndex[a.id + "," + b.id] || linkedByIndex[b.id + "," + a.id] || a.id == b.id;
                         }
 
+                        function isConnected2(a, b, chapterNumber){
+                          links.forEach(function (d) {
+                            if(d.source==a.id && d.target==b.id){
+                              if(d.chapter <= chapterNumber && d.isFamily==0)
+                                console.log("--true--")
+                                return 1;
+                            }
+                            if(d.target==a.id && d.source==b.id){
+                              if(d.chapter <= chapterNumber && d.isFamily==0)
+                                console.log("--true--")
+                                return 1;
+                            }
+                            return 0.2;
+                          });
+
+                        }
+
                         // fade nodes on hover
                         function mouseOver(opacity) {
                             return function (d) {
@@ -774,11 +795,11 @@ function init() {
                                 var thisOpacity = 1;
                                 var d = d.srcElement.__data__;
                                 circles.style("stroke-opacity", function (o) {
-                                    thisOpacity = isConnected(d, o) ? 1 : opacity;
+                                    thisOpacity = isConnected2(d, o, chapterNumber) ? 1 : opacity;
                                     return thisOpacity;
                                 });
                                 circles.style("fill-opacity", function (o) {
-                                    thisOpacity = isConnected(d, o) ? 1 : opacity;
+                                    thisOpacity = isConnected2(d, o, chapterNumber) ? 1 : opacity;
                                     return thisOpacity;
                                 });
                                 // also style link accordingly
@@ -798,8 +819,7 @@ function init() {
                             link.style("stroke", l => defineLinksColor(l));
                         }
 
-                        var node = svg
-                            .append("g")
+                        var node = ciao.join("g")
                             .attr("class", "nodes")
                             .attr("width", width)
                             .attr("height", height)
@@ -811,7 +831,7 @@ function init() {
                             })
                             .attr("class", function (d) {
                                 if (d.chapter <= chapterNumber)
-                                    return "in"
+                                    return "node"
                                 else return "out"
                             });
 
