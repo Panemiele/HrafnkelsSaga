@@ -802,12 +802,12 @@ function init() {
 
                         // fade nodes on hover
                         function mouseOver(opacity) {
-                            /*console.log(d.srcElement.__data__.id);
-                            console.log(linkedByIndex)*/
                             return function (d) {
                                 // check all other nodes to see if they're connected
                                 // to this one. if so, keep the opacity at 1, otherwise
                                 // fade
+                                console.log("link");
+                                console.log(link);
                                 var thisOpacity = 1;
                                 var d = d.srcElement.__data__;
                                 d3.selectAll("circle").style("stroke-opacity", function (o) {
@@ -819,11 +819,11 @@ function init() {
                                     return thisOpacity;
                                 });
                                 // also style link accordingly
-                                link.style("stroke-opacity", function (o) {
-                                    return o.source === d || o.target === d ? 1 : opacity;
+                                link.attr("stroke-opacity", function (o) {
+                                    return o.source.id == d.id || o.target.id == d.id ? 1 : opacity;
                                 });
-                                link.style("stroke", function (o) {
-                                    return o.source === d || o.target === d ? defineLinksColor(o) : "transparent";
+                                link.attr("stroke", function (o) {
+                                    return o.source.id == d.id || o.target.id == d.id ? defineLinksColor(o) : "transparent";
                                 });
                             };
                         }
@@ -831,8 +831,8 @@ function init() {
                         function mouseOut() {
                             d3.selectAll("circle").style("stroke-opacity", nodeStrokeOpacity);
                             d3.selectAll("circle").style("fill-opacity", 1);
-                            link.style("stroke-opacity", linkStrokeOpacity);
-                            link.style("stroke", l => defineLinksColor(l));
+                            link.attr("stroke-opacity", linkStrokeOpacity);
+                            link.attr("stroke", l => defineLinksColor(l));
                         }
 
                       if(isWritten==0){
