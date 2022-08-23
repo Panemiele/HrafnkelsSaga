@@ -3,14 +3,18 @@ var nodeRadius = 20;
 var width = "100%";
 var height = 700;
 var chapterNumber = parseInt(document.querySelector('#rangeField').value);
-var prevChapter=0;
+var prevChapter = 0;
 var xCenter = 700,
     yCenter = 300;
+var eventTransform;
 
 // Select the svg from HTML
 var svg = d3.select("#graph")
     .attr("width", width)
     .attr("height", height);
+
+var nodesGroup = svg.append("g");
+var node;
 
 function init() {
     d3.json('./dataset/characters_nodes.json').then(function (nodesData) {
@@ -116,11 +120,21 @@ function init() {
 
 
                     function reset() {
+                        resetLegend();
+                        resetUsageGuide();
                         svg.selectAll(".info").remove();
                         svg.selectAll("#svgNodeInfo").remove();
                         d3.select(this).remove();
                         svg.style("box-shadow", "0 0 0 0px rgba(0,0,0,0.65)");
+                    }
+
+                    function resetUsageGuide() {
+                        d3.select("#howToInteractWithGraph").remove();
                         drawGraphUsageGuide();
+                    }
+
+                    function resetLegend(){
+                        d3.select("#legend").remove();
                         drawLegend();
                     }
 
@@ -280,27 +294,6 @@ function init() {
                         result[1] = characterEdges;
                         result[2] = familyEdges;
                         return result;
-                    }
-
-                    function updateGraph() {
-                        prevChapter = chapterNumber;
-                        reset();
-                        chapterNumber = parseInt(document.querySelector('#rangeField').value);
-                        svg.selectAll(".out").remove();
-                        svg.selectAll(".links").remove();
-                        svg.select("#legend").remove();
-                        svg.select("#howToInteractWithGraph").remove();
-                        links = sortLinks(links);
-                        links = links.map(l => setLinkoccurrencyAndNumIterative(l));
-                        ForceGraph({ nodes, links, family }, {
-                            nodeId: d => d.id,
-                            nodeGroup: d => d.group,
-                            nodeTitle: d => `${d.label}`,
-                            width,
-                            height: 600,
-                        });
-                        drawLegend();
-                        drawGraphUsageGuide();
                     }
 
                     function selectNodesInChapter(nodesInChapter) {
@@ -731,6 +724,7 @@ function init() {
                             .lower()
                             .attr("class", "links")
                             .attr("stroke-linecap", linkStrokeLinecap)
+                            .attr("transform", eventTransform)
                             .selectAll("path")
                             .data(linksInChapter)
                             .join("path")
@@ -741,9 +735,12 @@ function init() {
                                 else return 1;
                             })
                             .attr("stroke-opacity", function (d) {
-                                if (parseInt(d.chapter) == chapterNumber)
+                                if (parseInt(d.chapter) == chapterNumber){
                                     return 1;
-                                else return 0.2;
+                                }
+                                else { 
+                                    return 0.2;
+                                }
                             })
                             .on("mouseover", d => {
                                 drawLinkInfos(d);
@@ -773,6 +770,8 @@ function init() {
                                 // fade
                                 var thisOpacity = 1;
                                 var d = d.srcElement.__data__;
+                                console.log("eccolo: ");
+                                console.log(d);
                                 circles.style("stroke-opacity", function (o) {
                                     thisOpacity = isConnected(d, o) ? 1 : opacity;
                                     return thisOpacity;
@@ -798,34 +797,36 @@ function init() {
                             link.style("stroke", l => defineLinksColor(l));
                         }
 
-                        var node = svg
-                            .append("g")
+                        var node = nodesGroup
+                            .join("g")
                             .attr("class", "nodes")
                             .attr("width", width)
                             .attr("height", height)
+                            .attr("transform", eventTransform)
                             .selectAll(".node")
                             .data(nodesInChapter)
                             .join("g")
-                            .attr("id", function(d){
-                                return "node"+d.id
-                            })
                             .attr("class", function (d) {
                                 if (d.chapter <= chapterNumber)
-                                    return "in"
-                                else return "out"
+                                    return "node"
+                                return "out"
                             });
 
                         var circles = node.append("circle")
                             .attr("id", d => "node" + d.id)
                             .attr("r", function (d) {
                                 if (prevChapter < chapterNumber){
-                                  if((d.chapter > prevChapter) && (d.chapter <= chapterNumber))
-                                      return nodeRadius;
-                                  else return 0;
+                                    if((d.chapter > prevChapter) && (d.chapter <= chapterNumber)){
+                                        return nodeRadius;
+                                    }
+                                    return 0;
                                 }
-                                else if(prevChapter > chapterNumber){
-                                  if(d.chapter > chapterNumber)
-                                    svg.select("#node"+d.id).remove();
+                                else {
+                                    if(d.chapter > chapterNumber){
+                                        var nodeToRemove = svg.select("#node"+d.id);
+                                        nodeToRemove.attr("class", "out");
+                                        nodeToRemove.remove();
+                                    }
                                 }
                             })
                             .on("click", d => {
@@ -841,18 +842,24 @@ function init() {
                             .attr("dx", 12)
                             .attr("dy", ".35em")
                             .text(function (d) { //d => d.label
-                              if (prevChapter < chapterNumber){
-                                if((d.chapter > prevChapter) && (d.chapter <= chapterNumber))
-                                    return d.label;
-                                else return "";
-                              }
+                                if (prevChapter < chapterNumber){
+                                    if((d.chapter > prevChapter) && (d.chapter <= chapterNumber)){
+                                        return d.label;
+                                    }
+                                    else return "";
+                                }
+                                else {
+                                    if(d.chapter > chapterNumber){
+                                        svg.select("#node"+d.id).attr("class", "out");
+                                        svg.select("#node"+d.id).remove();
+                                    }
+                                }
                             })
                             .style("stroke", "black")
                             .style("stroke-width", 0.5)
                             .style("fill", "gray");
 
                         if (invalidation != null) invalidation.then(() => simulation.stop());
-
 
                         svg.call(d3.zoom()
                             .scaleExtent([1 / 2, 8])
@@ -875,8 +882,9 @@ function init() {
                         }
 
                         function zoomGraph(event) {
-                            svg.selectAll(".nodes").attr("transform", event.transform);
-                            svg.selectAll(".links").attr("transform", event.transform);
+                            eventTransform = event.transform;
+                            svg.selectAll(".nodes").attr("transform", eventTransform);
+                            svg.selectAll(".links").attr("transform", eventTransform);
                         }
 
                         function displayNames(d) {
@@ -885,6 +893,38 @@ function init() {
 
                         return Object.assign(svg.node(), { scales: { color } });
                     }
+
+
+
+
+
+
+
+
+
+                    function updateGraph() {
+                        reset();
+                        prevChapter = chapterNumber;
+                        chapterNumber = parseInt(document.querySelector('#rangeField').value);
+                        svg.selectAll(".out").remove();
+                        svg.selectAll(".links").remove();
+                        svg.select("#legend").remove();
+                        svg.select("#howToInteractWithGraph").remove();
+                        links = sortLinks(links);
+                        links = links.map(l => setLinkoccurrencyAndNumIterative(l));
+                        ForceGraph({ nodes, links, family }, {
+                            nodeId: d => d.id,
+                            nodeGroup: d => d.group,
+                            nodeTitle: d => `${d.label}`,
+                            width,
+                            height: 600,
+                        });
+                        drawLegend();
+                        drawGraphUsageGuide();
+                    }
+
+
+
 
                     //--------------------------------------------------------------------------------------------
                     // INPUT ADJUSTEMENTS
