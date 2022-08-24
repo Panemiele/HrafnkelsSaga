@@ -14,6 +14,8 @@ var nodeText;
 var nodeTitle;
 var node;
 var link;
+var linksPositionMap = new Map();
+var simulation;
 
 // Select the svg from HTML
 var svg = d3.select("#graph")
@@ -493,7 +495,6 @@ function init() {
                             dToReturn = "M " + d.source.x + "," + d.source.y + " A 100 100 0 0 1," + d.target.x + " " + d.target.y;
                         }
                         return dToReturn;
-
                     }
 
                     function drawLegend() {
@@ -674,16 +675,8 @@ function init() {
                       }
 
                     async function defineLinksMovement(){
-                        d3.selectAll(".color")
-                                .attr("d", d => positionLink(d, mLinkNum))
-                                .attr("hostilityLevel", function (d) {
-                                    return d.hostilityLevel;
-                                });
-
-                        // var allLinksss = d3.selectAll(".grey");
-                        // console.log("allLinksss");
-                        // console.log(allLinksss);
-                        // allLinksss.attr("d", d => d.attr("d"));
+                        d3.selectAll(".color").attr("d", d => positionLink(d, mLinkNum));
+                        d3.selectAll(".grey").attr("d", d => positionLink(d, mLinkNum));
                     }
 
                     function ForceGraph({ nodes, links, family }, {
@@ -763,7 +756,7 @@ function init() {
                             forceFamilyLink.strength(linkStrength);
                         }
 
-                        const simulation = d3.forceSimulation(nodesInChapter)
+                        simulation = d3.forceSimulation(nodesInChapter)
                             .force("link", forceLink)
                             .force("link", forceFamilyLink)
                             .force("charge", forceNode)
@@ -772,15 +765,16 @@ function init() {
 
 
                         if(areLinksWritten==0){
-                          link = linksGroup
-                              .lower()
-                              .attr("class", "links")
-                              .attr("stroke-linecap", linkStrokeLinecap)
-                              .attr("transform", eventTransform)
-                              .selectAll("path")
-                              .data(linksInChapter)
-                              .join("path")
-                              .attr("id", d => d.id);
+                            link = linksGroup
+                                .lower()
+                                .attr("class", "links")
+                                .attr("stroke-linecap", linkStrokeLinecap)
+                                .attr("transform", eventTransform)
+                                .selectAll("path")
+                                .data(linksInChapter)
+                                .join("path")
+                                .attr("id", d => d.id);
+                            areLinksWritten = 1;
                         }
 
                         link
