@@ -14,6 +14,8 @@ var nodeText;
 var nodeTitle;
 var node;
 var link;
+var linksPositionMap = new Map();
+var simulation;
 
 // Select the svg from HTML
 var svg = d3.select("#graph")
@@ -340,9 +342,9 @@ function init() {
                             var isFamily = linksInChapter[i][5];
                             var occurrency = linksInChapter[i][6];
 
-                            if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
+                            //if (linksInChapter[i][2] <= chapterNumber && (nodesIds.indexOf(parseInt(source)) != -1) && (nodesIds.indexOf(parseInt(target)) != -1)) {
                                 temp.push({ source: source, target: target, chapter: chapter, action: action, hostilityLevel: hostilityLevel, isFamily: isFamily, occurrency: occurrency });
-                            }
+                            //}
                         }
                         return temp;
                     }
@@ -493,7 +495,6 @@ function init() {
                             dToReturn = "M " + d.source.x + "," + d.source.y + " A 100 100 0 0 1," + d.target.x + " " + d.target.y;
                         }
                         return dToReturn;
-
                     }
 
                     function drawLegend() {
@@ -648,6 +649,36 @@ function init() {
                         return l;
                     }
 
+                    function defineLinkClass(d){
+                        if(d.isFamily == 1)
+                            return "none";
+                        if(prevChapter < chapterNumber){
+                            if(parseInt(d.chapter) == chapterNumber){
+                                return "color";
+                            }
+                            else{
+                                if(parseInt(d.chapter) <= chapterNumber){
+                                  return "grey";
+                                }
+                                return "none";
+                            }
+                        }
+                        else {
+                            if(parseInt(d.chapter) > chapterNumber){
+                              return "none";
+                            }
+                            else if (parseInt(d.chapter) == chapterNumber){
+                                return "color";
+                            }
+                            else return "grey";
+                        }
+                      }
+
+                    async function defineLinksMovement(){
+                        d3.selectAll(".color").attr("d", d => positionLink(d, mLinkNum));
+                        d3.selectAll(".grey").attr("d", d => positionLink(d, mLinkNum));
+                    }
+
                     function ForceGraph({ nodes, links, family }, {
                         nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
                         nodeLabel = d => d.label,
@@ -725,7 +756,7 @@ function init() {
                             forceFamilyLink.strength(linkStrength);
                         }
 
-                        const simulation = d3.forceSimulation(nodesInChapter)
+                        simulation = d3.forceSimulation(nodesInChapter)
                             .force("link", forceLink)
                             .force("link", forceFamilyLink)
                             .force("charge", forceNode)
@@ -734,37 +765,20 @@ function init() {
 
 
                         if(areLinksWritten==0){
-                          link = linksGroup
-                              .lower()
-                              .attr("class", "links")
-                              .attr("stroke-linecap", linkStrokeLinecap)
-                              .attr("transform", eventTransform)
-                              .selectAll("path")
-                              .data(linksInChapter)
-                              .join("path")
-                              .attr("id", d => d.id);
+                            link = linksGroup
+                                .lower()
+                                .attr("class", "links")
+                                .attr("stroke-linecap", linkStrokeLinecap)
+                                .attr("transform", eventTransform)
+                                .selectAll("path")
+                                .data(linksInChapter)
+                                .join("path")
+                                .attr("id", d => d.id);
+                            areLinksWritten = 1;
                         }
 
                         link
-                          .attr("class", function (d) {
-                            if(prevChapter < chapterNumber){
-                                if((parseInt(d.chapter) > prevChapter) && (parseInt(d.chapter) <= chapterNumber)){
-                                    return "color";
-                                }
-                                else{
-                                    if(parseInt(d.chapter) <= chapterNumber){
-                                      return "grey";
-                                    }
-                                    return "none";
-                                }
-                            }
-                            else {
-                                if(parseInt(d.chapter) > chapterNumber){
-                                  return "none";
-                                }
-                            }
-                          })
-                          .attr("stroke", l => defineLinksColor(l))
+                          .attr("class", d => defineLinkClass(d))
                           .attr("stroke-width", function (d) {
                               if (parseInt(d.chapter) == chapterNumber)
                                   return 3;
@@ -778,14 +792,13 @@ function init() {
                                   return 0.2;
                               }
                           })
-                          .on("mouseover", d => {
-                              drawLinkInfos(d);
-                          })
-                          .on("mouseleave", () => {
-                              svg.selectAll(".edgeAction").remove();
-                          });
+                          .on("mouseover", d => drawLinkInfos(d))
+                          .on("mouseleave", () => svg.selectAll(".edgeAction").remove());
 
 
+                        d3.selectAll(".color").attr("stroke", l => defineLinksColor(l));
+                        d3.selectAll(".grey").attr("stroke", "#999");
+                        d3.selectAll(".none").attr("stroke", "transparent");
 
                         // build a dictionary of nodes that are linked
                         var linkedByIndex = {};
@@ -806,8 +819,6 @@ function init() {
                                 // check all other nodes to see if they're connected
                                 // to this one. if so, keep the opacity at 1, otherwise
                                 // fade
-                                console.log("link");
-                                console.log(link);
                                 var thisOpacity = 1;
                                 var d = d.srcElement.__data__;
                                 d3.selectAll("circle").style("stroke-opacity", function (o) {
@@ -820,10 +831,14 @@ function init() {
                                 });
                                 // also style link accordingly
                                 link.attr("stroke-opacity", function (o) {
-                                    return o.source.id == d.id || o.target.id == d.id ? 1 : opacity;
+                                    if(d.chapter <= chapterNumber && o.chapter <= chapterNumber)
+                                        return o.source.id == d.id || o.target.id == d.id ? 1 : opacity;
+                                    return 0;
                                 });
                                 link.attr("stroke", function (o) {
-                                    return o.source.id == d.id || o.target.id == d.id ? defineLinksColor(o) : "transparent";
+                                    if(d.chapter <= chapterNumber && o.chapter <= chapterNumber)
+                                        return o.source.id == d.id || o.target.id == d.id ? defineLinksColor(o) : "transparent";
+                                    return "transparent";
                                 });
                             };
                         }
@@ -833,6 +848,9 @@ function init() {
                             d3.selectAll("circle").style("fill-opacity", 1);
                             link.attr("stroke-opacity", linkStrokeOpacity);
                             link.attr("stroke", l => defineLinksColor(l));
+                            d3.selectAll(".color").attr("stroke", l => defineLinksColor(l));
+                            d3.selectAll(".grey").attr("stroke", "#999");
+                            d3.selectAll(".none").attr("stroke", "transparent");
                         }
 
                       if(isWritten==0){
@@ -908,10 +926,7 @@ function init() {
                         }
 
                         function ticked() {
-                            link.attr("d", d => positionLink(d, mLinkNum))
-                                .attr("hostilityLevel", function (d) {
-                                    return d.hostilityLevel;
-                                });
+                            defineLinksMovement();
 
                             circles.attr("cx", d => d.x)
                                 .attr("cy", d => d.y);
@@ -925,10 +940,6 @@ function init() {
                             svg.selectAll(".links").attr("transform", eventTransform);
                         }
 
-                        function displayNames(d) {
-                            svg.append("rect").attr("x", "5.7%").attr("y", 300).attr("width", 400).attr("height", 200).style("fill", "white")
-                        }
-
                         return Object.assign(svg.node(), { scales: { color } });
                     }
 
@@ -940,8 +951,6 @@ function init() {
                         reset();
                         prevChapter = chapterNumber;
                         chapterNumber = parseInt(document.querySelector('#rangeField').value);
-                        //svg.selectAll(".out").remove();
-                        //svg.selectAll(".links").remove();
                         svg.select("#legend").exit();
                         svg.select("#howToInteractWithGraph").exit();
                         links = sortLinks(links);
@@ -953,32 +962,8 @@ function init() {
                             width,
                             height: 600,
                         });
-                        //drawLegend();
-                        //drawGraphUsageGuide();
                     }
 
-
-
-                    /*function updateGraph() {
-                        reset();
-                        prevChapter = chapterNumber;
-                        chapterNumber = parseInt(document.querySelector('#rangeField').value);
-                        //svg.selectAll(".out").remove();
-                        svg.selectAll(".links").remove();
-                        svg.select("#legend").exit();
-                        svg.select("#howToInteractWithGraph").exit();
-                        links = sortLinks(links);
-                        links = links.map(l => setLinkoccurrencyAndNumIterative(l));
-                        ForceGraph({ nodes, links, family }, {
-                            nodeId: d => d.id,
-                            nodeGroup: d => d.group,
-                            nodeTitle: d => `${d.label}`,
-                            width,
-                            height: 600,
-                        });
-                        //drawLegend();
-                        //drawGraphUsageGuide();
-                    }*/
 
 
 
